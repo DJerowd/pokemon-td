@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="PokemonData" format=3 uid="uid://df23bbsld70ed"]
+
+[ext_resource type="Script" uid="uid://bqlcdh1hu7jdp" path="res://scripts/data/PokemonData.gd" id="1_3csom"]
+
+[resource]
+script = ExtResource("1_3csom")
+species_name = "Charmander"
+primary_type = 1
+secondary_type = 1
+metadata/_custom_type_script = "uid://bqlcdh1hu7jdp"

@@ -1,0 +1,52 @@
+[gd_scene format=3 uid="uid://drbwkqeo8kxub"]
+
+[ext_resource type="Script" uid="uid://vdnjbkwwwgf7" path="res://scenes/entities/Enemy.gd" id="1_8dejf"]
+
+[sub_resource type="Gradient" id="Gradient_8dejf"]
+colors = PackedColorArray(1, 0, 0, 0.60784316, 1, 0, 0, 1)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_545dc"]
+gradient = SubResource("Gradient_8dejf")
+width = 32
+height = 32
+fill_from = Vector2(0, 1)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_ns2t1"]
+size = Vector2(64, 64)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_bslst"]
+bg_color = Color(0.6862745, 0, 0, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0, 0, 0, 1)
+
+[node name="Enemy" type="PathFollow2D" unique_id=1315599842]
+script = ExtResource("1_8dejf")
+
+[node name="CharacterBody2D" type="CharacterBody2D" parent="." unique_id=883934288]
+input_pickable = true
+
+[node name="Sprite2D" type="Sprite2D" parent="CharacterBody2D" unique_id=755062499]
+position = Vector2(-1.1920929e-07, -1.7881393e-07)
+scale = Vector2(1.9999999, 1.9999999)
+texture = SubResource("GradientTexture2D_545dc")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="CharacterBody2D" unique_id=565824406]
+shape = SubResource("RectangleShape2D_ns2t1")
+
+[node name="ProgressBar" type="ProgressBar" parent="CharacterBody2D" unique_id=1463170522]
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -85.0
+offset_top = -62.0
+offset_right = 85.0
+offset_bottom = -41.0
+grow_horizontal = 2
+grow_vertical = 0
+theme_override_font_sizes/font_size = 12
+theme_override_styles/background = SubResource("StyleBoxFlat_bslst")

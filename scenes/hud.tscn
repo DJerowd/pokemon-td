@@ -1,0 +1,75 @@
+[gd_scene format=3 uid="uid://dmv8l0bn1h4c0"]
+
+[ext_resource type="Script" uid="uid://doajxq7om3t7p" path="res://scenes/main/HUD.gd" id="1_ahhtf"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_5vsmd"]
+bg_color = Color(0.101960786, 0.10980392, 0.13725491, 1)
+border_width_bottom = 2
+border_color = Color(1, 0.79607844, 0.019607844, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_kgcmi"]
+content_margin_left = 8.0
+content_margin_top = 8.0
+content_margin_right = 8.0
+content_margin_bottom = 8.0
+bg_color = Color(0.5882353, 0, 0, 1)
+
+[node name="HUD" type="Control" unique_id=1160260611]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_bottom = -610.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 6
+size_flags_vertical = 4
+script = ExtResource("1_ahhtf")
+
+[node name="Panel" type="Panel" parent="." unique_id=310440606]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 3
+theme_override_styles/panel = SubResource("StyleBoxFlat_5vsmd")
+
+[node name="TopBar" type="HBoxContainer" parent="." unique_id=1760595510]
+custom_minimum_size = Vector2(0, 64)
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 12
+alignment = 1
+
+[node name="LblMoney" type="Label" parent="TopBar" unique_id=886248957]
+unique_name_in_owner = true
+layout_mode = 2
+text = "$500"
+
+[node name="LblLives" type="Label" parent="TopBar" unique_id=1705937457]
+unique_name_in_owner = true
+layout_mode = 2
+text = "20"
+
+[node name="LblWave" type="Label" parent="TopBar" unique_id=1687437162]
+unique_name_in_owner = true
+layout_mode = 2
+text = "1"
+
+[node name="Control" type="Control" parent="TopBar" unique_id=1995874490]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="BtnStartWave" type="Button" parent="TopBar" unique_id=1962725397]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
+theme_override_styles/normal = SubResource("StyleBoxFlat_kgcmi")
+text = "Próxima Onda"

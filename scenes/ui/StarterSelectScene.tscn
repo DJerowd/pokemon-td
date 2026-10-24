@@ -1,0 +1,174 @@
+[gd_scene format=3 uid="uid://wduivhnjux8g"]
+
+[ext_resource type="Script" uid="uid://cjwyv414avbat" path="res://scenes/ui/StarterSelectScene.gd" id="1_elmua"]
+[ext_resource type="Texture2D" uid="uid://buu7q26bbwaqu" path="res://assets/textures/ui/Gemini_Generated_Image_gguet1gguet1ggue.jpeg" id="2_7dfg7"]
+[ext_resource type="Texture2D" uid="uid://dql530vd02ktf" path="res://assets/textures/ui/pokeball_closed.jpeg" id="3_7dfg7"]
+[ext_resource type="Texture2D" uid="uid://br8gexrqq2fuf" path="res://assets/textures/ui/dialog_box_bg.png" id="4_7dfg7"]
+
+[sub_resource type="CanvasTexture" id="CanvasTexture_rkasr"]
+diffuse_texture = ExtResource("3_7dfg7")
+
+[sub_resource type="CanvasTexture" id="CanvasTexture_6a4wu"]
+diffuse_texture = ExtResource("3_7dfg7")
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_5vsmd"]
+atlas = ExtResource("4_7dfg7")
+region = Rect2(2, 94, 252, 44)
+
+[node name="StarterSelectScene" type="Control" unique_id=1926286847]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_elmua")
+
+[node name="TextureRect" type="TextureRect" parent="." unique_id=1603555026]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("2_7dfg7")
+expand_mode = 1
+
+[node name="TitleLabel" type="Label" parent="." unique_id=236573166]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_bottom = 23.0
+grow_horizontal = 2
+size_flags_vertical = 0
+text = "Escolha seu Pokémon inicial!"
+horizontal_alignment = 1
+
+[node name="VBoxContainer" type="VBoxContainer" parent="." unique_id=1986635611]
+layout_mode = 1
+anchors_preset = 13
+anchor_left = 0.5
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -135.0
+offset_right = 135.0
+grow_horizontal = 2
+grow_vertical = 2
+alignment = 1
+
+[node name="PokeballsRow" type="HBoxContainer" parent="VBoxContainer" unique_id=2091138572]
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
+alignment = 1
+
+[node name="Pokeball1" type="TextureButton" parent="VBoxContainer/PokeballsRow" unique_id=907242757]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
+texture_normal = SubResource("CanvasTexture_rkasr")
+
+[node name="Pokeball2" type="TextureButton" parent="VBoxContainer/PokeballsRow" unique_id=346254047]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
+texture_normal = SubResource("CanvasTexture_6a4wu")
+
+[node name="Pokeball3" type="TextureButton" parent="VBoxContainer/PokeballsRow" unique_id=347256390]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
+texture_normal = SubResource("CanvasTexture_6a4wu")
+
+[node name="BtnLeft" type="Button" parent="." unique_id=1980122571]
+layout_mode = 1
+anchors_preset = 4
+anchor_top = 0.5
+anchor_bottom = 0.5
+offset_top = -15.5
+offset_right = 18.0
+offset_bottom = 15.5
+grow_vertical = 2
+text = "<"
+
+[node name="BtnRight" type="Button" parent="." unique_id=1288485400]
+layout_mode = 1
+anchors_preset = 6
+anchor_left = 1.0
+anchor_top = 0.5
+anchor_right = 1.0
+anchor_bottom = 0.5
+offset_left = -8.0
+offset_top = -4.0
+offset_bottom = 4.0
+grow_horizontal = 0
+grow_vertical = 2
+text = ">"
+
+[node name="HoverPreviewPanel" type="PanelContainer" parent="." unique_id=521181145]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="PreviewName" type="Label" parent="HoverPreviewPanel" unique_id=1506813759]
+layout_mode = 2
+
+[node name="PreviewSprite" type="TextureRect" parent="HoverPreviewPanel" unique_id=1300419997]
+layout_mode = 2
+
+[node name="DialogueBox" type="NinePatchRect" parent="." unique_id=35349048]
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -166.0
+grow_horizontal = 2
+grow_vertical = 0
+texture = SubResource("AtlasTexture_5vsmd")
+
+[node name="DialogueLabel" type="Label" parent="DialogueBox" unique_id=2074600295]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -204.5
+offset_top = -11.5
+offset_right = 204.5
+offset_bottom = 11.5
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+text = "Will you choose Bulbasaur, the Grass-type Pokémon?"
+
+[node name="ChoicesContainer" type="HBoxContainer" parent="DialogueBox" unique_id=1335866584]
+layout_mode = 1
+anchors_preset = 6
+anchor_left = 1.0
+anchor_top = 0.5
+anchor_right = 1.0
+anchor_bottom = 0.5
+offset_left = -145.0
+offset_top = -15.5
+offset_right = -67.0
+offset_bottom = 15.5
+grow_horizontal = 0
+grow_vertical = 2
+theme_override_constants/separation = 12
+
+[node name="BtnYes" type="Button" parent="DialogueBox/ChoicesContainer" unique_id=629278061]
+layout_mode = 2
+text = "Yes
+"
+
+[node name="BtnNo" type="Button" parent="DialogueBox/ChoicesContainer" unique_id=589177762]
+layout_mode = 2
+text = "No
+
+
+"

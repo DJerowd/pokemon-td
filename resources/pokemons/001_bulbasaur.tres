@@ -1,0 +1,7 @@
+[gd_resource type="Resource" script_class="PokemonData" format=3 uid="uid://bji7cf4x66sxm"]
+
+[ext_resource type="Script" uid="uid://bqlcdh1hu7jdp" path="res://scripts/data/PokemonData.gd" id="1_fafav"]
+
+[resource]
+script = ExtResource("1_fafav")
+metadata/_custom_type_script = "uid://bqlcdh1hu7jdp"

@@ -1,0 +1,51 @@
+[gd_scene format=3 uid="uid://dabpu657mw56v"]
+
+[ext_resource type="Script" uid="uid://bl62f7gep5j0p" path="res://scenes/ui/TowerInspectorMenu.gd" id="1_1f6dm"]
+
+[node name="TowerInspectorMenu" type="Control" unique_id=1756162165]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_vertical = 10
+script = ExtResource("1_1f6dm")
+
+[node name="ColorRect" type="ColorRect" parent="." unique_id=1141994931]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 1)
+
+[node name="VBoxContainer" type="VBoxContainer" parent="." unique_id=1639329345]
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -116.0
+grow_horizontal = 2
+grow_vertical = 0
+
+[node name="LblTitle" type="Label" parent="VBoxContainer" unique_id=1545131716]
+layout_mode = 2
+text = "nome"
+
+[node name="LblStats" type="Label" parent="VBoxContainer" unique_id=1978966960]
+layout_mode = 2
+text = "HP, Ataque, Defesa"
+
+[node name="LblItem" type="Label" parent="VBoxContainer" unique_id=188055571]
+layout_mode = 2
+text = "item"
+
+[node name="MovesBox" type="HBoxContainer" parent="VBoxContainer" unique_id=602845849]
+layout_mode = 2
+
+[node name="BtnClose" type="Button" parent="VBoxContainer" unique_id=445329781]
+layout_mode = 2
+text = "Fechar"

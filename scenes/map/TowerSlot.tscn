@@ -1,0 +1,25 @@
+[gd_scene format=3 uid="uid://uooapxbsmgvh"]
+
+[ext_resource type="Script" uid="uid://bb2dkyvld0c5n" path="res://scenes/map/TowerSlot.gd" id="1_s8iii"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_akamx"]
+size = Vector2(64, 64)
+
+[sub_resource type="Gradient" id="Gradient_s8iii"]
+offsets = PackedFloat32Array(0.98203593, 1)
+colors = PackedColorArray(0, 0, 0, 0, 0, 0, 0, 0.23529412)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_wmj24"]
+gradient = SubResource("Gradient_s8iii")
+fill = 2
+fill_from = Vector2(0.5, 0.5)
+fill_to = Vector2(0.8, 0.1)
+
+[node name="TowerSlot" type="Area2D" unique_id=1904852898]
+script = ExtResource("1_s8iii")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1811205866]
+shape = SubResource("RectangleShape2D_akamx")
+
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=947069114]
+texture = SubResource("GradientTexture2D_wmj24")

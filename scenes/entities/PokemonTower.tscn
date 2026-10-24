@@ -1,0 +1,56 @@
+[gd_scene format=3 uid="uid://wjyif7x4yajn"]
+
+[ext_resource type="Script" uid="uid://bnh8cwdp00tcr" path="res://scenes/entities/PokemonTower.gd" id="1_dskpm"]
+[ext_resource type="Texture2D" uid="uid://7m8jxht3bp7k" path="res://assets/textures/DS _ DSi - Pokemon Black 2 _ White 2 - Overworld - Pokemon (Overworld).png" id="2_4moug"]
+
+[sub_resource type="Animation" id="Animation_4moug"]
+resource_name = "idle_down"
+
+[sub_resource type="Animation" id="Animation_bslst"]
+resource_name = "idle_left"
+
+[sub_resource type="Animation" id="Animation_dq5tg"]
+resource_name = "idle_right"
+
+[sub_resource type="Animation" id="Animation_athu1"]
+resource_name = "idle_up"
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_620sp"]
+_data = {
+&"idle_down": SubResource("Animation_4moug"),
+&"idle_left": SubResource("Animation_bslst"),
+&"idle_right": SubResource("Animation_dq5tg"),
+&"idle_up": SubResource("Animation_athu1")
+}
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_s8iii"]
+atlas = ExtResource("2_4moug")
+region = Rect2(0, 0, 32, 32)
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_5vsmd"]
+radius = 64.0
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_5vsmd"]
+size = Vector2(64, 64)
+
+[node name="PokemonTower" type="Node2D" unique_id=2003907783]
+script = ExtResource("1_dskpm")
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="." unique_id=839005687]
+libraries/ = SubResource("AnimationLibrary_620sp")
+
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=1776466]
+scale = Vector2(2, 2)
+texture = SubResource("AtlasTexture_s8iii")
+
+[node name="Area2D" type="Area2D" parent="." unique_id=1336741558]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D" unique_id=1095107291]
+shape = SubResource("CircleShape2D_5vsmd")
+
+[node name="Timer" type="Timer" parent="." unique_id=1578805001]
+
+[node name="ClickArea" type="Area2D" parent="." unique_id=1875902350]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="ClickArea" unique_id=452009095]
+shape = SubResource("RectangleShape2D_5vsmd")

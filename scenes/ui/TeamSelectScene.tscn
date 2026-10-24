@@ -1,0 +1,179 @@
+[gd_scene format=3 uid="uid://cp4o6e08ow5qj"]
+
+[ext_resource type="Script" uid="uid://bq7vwusg78f5t" path="res://scenes/ui/TeamSelectScene.gd" id="1_5qb6u"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_k3cjr"]
+bg_color = Color(0.13333334, 0.13333334, 0.13333334, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.5649616, 0.5649617, 0.5649613, 1)
+corner_radius_top_left = 10
+corner_radius_top_right = 10
+corner_radius_bottom_right = 10
+corner_radius_bottom_left = 10
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_5vsmd"]
+bg_color = Color(0.13333334, 0.13333334, 0.13333334, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[node name="TeamSelectScene" type="Control" unique_id=1329344802]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_5qb6u")
+
+[node name="Background" type="ColorRect" parent="." unique_id=2039047685]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.07683582, 0.07683582, 0.07683582, 1)
+
+[node name="MarginContainer" type="MarginContainer" parent="." unique_id=888336173]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 24
+theme_override_constants/margin_top = 24
+theme_override_constants/margin_right = 24
+theme_override_constants/margin_bottom = 24
+
+[node name="MainLayout" type="VBoxContainer" parent="MarginContainer" unique_id=1788215522]
+layout_mode = 2
+
+[node name="TopSection" type="VBoxContainer" parent="MarginContainer/MainLayout" unique_id=2054961125]
+layout_mode = 2
+
+[node name="HeaderRow" type="HBoxContainer" parent="MarginContainer/MainLayout/TopSection" unique_id=120126891]
+layout_mode = 2
+
+[node name="TitleLabel" type="Label" parent="MarginContainer/MainLayout/TopSection/HeaderRow" unique_id=1127922725]
+layout_mode = 2
+text = "Current Team:"
+
+[node name="Spacer" type="Control" parent="MarginContainer/MainLayout/TopSection/HeaderRow" unique_id=1541129850]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="BackButton" type="Button" parent="MarginContainer/MainLayout/TopSection/HeaderRow" unique_id=678111148]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Back
+"
+
+[node name="StartButton" type="Button" parent="MarginContainer/MainLayout/TopSection/HeaderRow" unique_id=1832008171]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Start
+"
+
+[node name="TeamSlotsRow" type="HBoxContainer" parent="MarginContainer/MainLayout/TopSection" unique_id=1653027215]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="Slot1" type="Panel" parent="MarginContainer/MainLayout/TopSection/TeamSlotsRow" unique_id=1615905508]
+custom_minimum_size = Vector2(64, 64)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_k3cjr")
+
+[node name="Slot2" type="Panel" parent="MarginContainer/MainLayout/TopSection/TeamSlotsRow" unique_id=173882197]
+custom_minimum_size = Vector2(64, 64)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_k3cjr")
+
+[node name="Slot3" type="Panel" parent="MarginContainer/MainLayout/TopSection/TeamSlotsRow" unique_id=386916110]
+custom_minimum_size = Vector2(64, 64)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_k3cjr")
+
+[node name="Slot4" type="Panel" parent="MarginContainer/MainLayout/TopSection/TeamSlotsRow" unique_id=783781005]
+custom_minimum_size = Vector2(64, 64)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_k3cjr")
+
+[node name="Slot5" type="Panel" parent="MarginContainer/MainLayout/TopSection/TeamSlotsRow" unique_id=872535963]
+custom_minimum_size = Vector2(64, 64)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_k3cjr")
+
+[node name="Slot6" type="Panel" parent="MarginContainer/MainLayout/TopSection/TeamSlotsRow" unique_id=327656912]
+custom_minimum_size = Vector2(64, 64)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_k3cjr")
+
+[node name="MiddleSection" type="VBoxContainer" parent="MarginContainer/MainLayout" unique_id=483329398]
+layout_mode = 2
+
+[node name="StorageHeaderRow" type="HBoxContainer" parent="MarginContainer/MainLayout/MiddleSection" unique_id=920902678]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="StorageTitle" type="Label" parent="MarginContainer/MainLayout/MiddleSection/StorageHeaderRow" unique_id=972815596]
+layout_mode = 2
+text = "Storage:"
+
+[node name="HelpLabel" type="Label" parent="MarginContainer/MainLayout/MiddleSection/StorageHeaderRow" unique_id=76593289]
+layout_mode = 2
+text = "Drag a pokemon into your team"
+
+[node name="Spacer2" type="Control" parent="MarginContainer/MainLayout/MiddleSection/StorageHeaderRow" unique_id=245305210]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="FilterNumberBtn" type="Button" parent="MarginContainer/MainLayout/MiddleSection/StorageHeaderRow" unique_id=1265340691]
+layout_mode = 2
+text = "Number"
+
+[node name="FilterNameBtn" type="Button" parent="MarginContainer/MainLayout/MiddleSection/StorageHeaderRow" unique_id=246057235]
+layout_mode = 2
+text = "Name"
+
+[node name="FilterLevelBtn" type="Button" parent="MarginContainer/MainLayout/MiddleSection/StorageHeaderRow" unique_id=1880398870]
+layout_mode = 2
+text = "Level"
+
+[node name="StorageBottomSection" type="Panel" parent="MarginContainer/MainLayout" unique_id=1687518530]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_styles/panel = SubResource("StyleBoxFlat_5vsmd")
+
+[node name="ScrollContainer" type="ScrollContainer" parent="MarginContainer/MainLayout/StorageBottomSection" unique_id=1944036889]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/scrollbar_h_separation = 8
+theme_override_constants/scrollbar_v_separation = 8
+
+[node name="StorageGrid" type="GridContainer" parent="MarginContainer/MainLayout/StorageBottomSection/ScrollContainer" unique_id=1792447319]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(64, 64)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/h_separation = 8
+theme_override_constants/v_separation = 8
+columns = 7
+
+[node name="PokemonCard_1" type="VBoxContainer" parent="MarginContainer/MainLayout/StorageBottomSection/ScrollContainer/StorageGrid" unique_id=1164888605]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="PokemonCard_2" type="VBoxContainer" parent="MarginContainer/MainLayout/StorageBottomSection/ScrollContainer/StorageGrid" unique_id=2089861810]
+layout_mode = 2
+size_flags_horizontal = 3
