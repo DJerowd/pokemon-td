@@ -31,12 +31,20 @@ var anim_timer: float = 0.0
 var enemies_in_range: Array = []
 var sprite_sheet: Texture2D
 var invalid_sprite_warning_shown: bool = false
+var current_hp: float = 1.0
+var max_hp: float = 1.0
+var status_attack_timer: float = 0.0
 @onready var attack_timer: Timer = $Timer
 @onready var range_area: Area2D = $Area2D
 @onready var click_area: Area2D = $ClickArea
 @onready var sprite: Sprite2D = $Sprite2D
 
 func _ready() -> void:
+	add_to_group("towers")
+	max_hp = maxf(1.0, pokemon_data.hp) if pokemon_data else 1.0
+	current_hp = clampf(pokemon_data.current_hp if pokemon_data and pokemon_data.current_hp > 0.0 else max_hp, 1.0, max_hp)
+	if pokemon_data:
+		pokemon_data.current_hp = current_hp
 	sprite_sheet = load(SPRITE_SHEET_PATH) as Texture2D
 	if sprite:
 		sprite.centered = true
@@ -111,6 +119,30 @@ func update_sprite_texture() -> void:
 	var scale_factor := sprite_display_size / maxf(1.0, largest_dimension)
 	sprite.scale = Vector2(scale_factor, scale_factor)
 	sprite.flip_h = false
+
+func take_damage(amount: float, inflicted_status: String = "") -> void:
+	if amount <= 0.0 or not is_inside_tree():
+		return
+	current_hp = maxf(0.0, current_hp - amount)
+	if pokemon_data:
+		pokemon_data.current_hp = current_hp
+		if not inflicted_status.is_empty():
+			pokemon_data.status_condition = inflicted_status
+	if current_hp <= 0.0:
+		if GameManager.selected_battle_pokemon == pokemon_data:
+			GameManager.selected_battle_pokemon = null
+		queue_free()
+	else:
+		GameManager.stats_changed.emit()
+
+func heal(amount: float) -> bool:
+	if amount <= 0.0 or current_hp >= max_hp:
+		return false
+	current_hp = minf(max_hp, current_hp + amount)
+	if pokemon_data:
+		pokemon_data.current_hp = current_hp
+	GameManager.stats_changed.emit()
+	return true
 
 func _draw() -> void:
 	if is_selected and pokemon_data:
