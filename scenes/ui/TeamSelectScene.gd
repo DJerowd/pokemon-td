@@ -4,6 +4,7 @@ const STARTER_SCENE := "res://scenes/ui/StarterSelectScene.tscn"
 const GAME_SCENE := "res://scenes/main/GameScene.tscn"
 const SPRITE_SHEET_PATH := "res://assets/textures/DS _ DSi - Pokemon Black 2 _ White 2 - Overworld - Pokemon (Overworld).png"
 const SPRITE_FRAME_SIZE := Vector2(32, 32)
+const SPRITE_FACTORY = preload("res://scripts/data/SpriteFrameFactory.gd")
 
 @onready var storage_grid: GridContainer = %StorageGrid
 @onready var team_slots_row: HBoxContainer = %TeamSlotsRow
@@ -80,11 +81,9 @@ func _texture_for_pokemon(pokemon: PokemonData) -> Texture2D:
 	var bounds := Rect2(Vector2.ZERO, sprite_sheet.get_size())
 	if pokemon.sprite_origin.x < 0.0 or pokemon.sprite_origin.y < 0.0 or not bounds.encloses(region):
 		return null
-	var atlas := AtlasTexture.new()
-	atlas.atlas = sprite_sheet
-	atlas.region = region
-	pokemon.sprite = atlas
-	return atlas
+	var texture := SPRITE_FACTORY.make_frame(sprite_sheet, region)
+	pokemon.sprite = texture
+	return texture
 
 func populate_storage_grid() -> void:
 	for child in storage_grid.get_children():
