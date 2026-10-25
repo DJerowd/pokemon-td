@@ -2,7 +2,7 @@ class_name PokemonData
 extends Resource
 
 # NONE representa explicitamente a ausência de segundo tipo.
-enum Type { NONE, NORMAL, FIRE, WATER, GRASS, ELECTRIC, ICE, FIGHTING, POISON, GROUND, FLYING, PSYCHIC, BUG, ROCK, GHOST, DRAGON }
+enum Type { NORMAL, FIRE, WATER, GRASS, ELECTRIC, ICE, FIGHTING, POISON, GROUND, FLYING, PSYCHIC, BUG, ROCK, GHOST, DRAGON, NONE }
 
 @export_category("Informações Básicas")
 @export var id: int = 1
