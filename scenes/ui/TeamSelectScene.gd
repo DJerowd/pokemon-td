@@ -161,6 +161,10 @@ func _on_start_button_pressed() -> void:
 	GameManager.player_money = 100
 	GameManager.player_lives = 10
 	GameManager.pokeballs = 5
+	GameManager.pokeball_inventory = {"Poké Bola": 5, "Great Ball": 2, "Ultra Ball": 1}
+	GameManager.selected_pokeball = "Poké Bola"
+	GameManager.inventory_items = {"Poção": 3, "Antídoto": 2, "Despertar": 1}
+	GameManager.selected_battle_pokemon = null
 	GameManager.game_over = false
 	GameManager.stats_changed.emit()
 	get_tree().change_scene_to_file(GAME_SCENE)
