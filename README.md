@@ -114,7 +114,8 @@ A torre usa `Area2D` para saber quando corpos entram ou saem do alcance. A área
 - A barra da equipe exibe sprite e nível até o Pokémon ser posicionado; a barra reage ao sinal `team_changed`.
 - `WaveManager.gd` define rosters pré-programados por onda, com espécies, HP, velocidade, recompensa e política de captura. Alguns inimigos especiais não podem ser capturados.
 - A HUD permite alternar entre Poké Bola, Great Ball e Ultra Ball. As bolas possuem bônus de captura diferentes e consomem inventários separados.
-- Itens disponíveis durante a batalha: Poção (recupera HP), Antídoto (remove envenenamento) e Despertar (remove sono). Clique em uma torre para selecioná-la como alvo e use os botões da HUD. Inimigos especiais podem causar dano e condições de status a Pokémon posicionados.
+- Itens disponíveis durante a batalha: Poção (recupera HP), Antídoto (remove envenenamento) e Despertar (remove sono). Clique em uma torre para selecioná-la como alvo e use os botões da HUD. Inimigos especiais podem causar dano e condições de status a Pokémon posicionados; envenenamento causa dano periódico e sono interrompe os ataques até ser curado.
+- Pokémon capturados entram automaticamente na equipe ativa se houver espaço entre os seis membros; caso contrário, ficam no armazenamento.
 
 ### Checklist adicional para testar
 
