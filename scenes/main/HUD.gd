@@ -142,7 +142,7 @@ func _animate_bag_icon(opening: bool) -> void:
 func _create_bag_panel() -> void:
 	bag_panel = _make_inventory_panel("ItemsBagPanel", Vector2(-330, -450), Vector2(-18, -100))
 	bag_list = _add_inventory_list(bag_panel)
-	balls_panel = _make_inventory_panel("PokeballsBagPanel", Vector2(-420, -450), Vector2(-108, -100))
+	balls_panel = _make_inventory_panel("PokeballsBagPanel", Vector2(-650, -450), Vector2(-338, -100))
 	balls_list = _add_inventory_list(balls_panel)
 	_rebuild_bag_list()
 
@@ -159,7 +159,7 @@ func _make_inventory_panel(panel_name: String, top_left_offset: Vector2, bottom_
 	panel.offset_top = top_left_offset.y
 	panel.offset_right = bottom_right_offset.x
 	panel.offset_bottom = bottom_right_offset.y
-	panel.z_index = 25
+	panel.z_index = 40
 	panel.mouse_filter = Control.MOUSE_FILTER_STOP
 	panel.add_theme_stylebox_override("panel", _make_panel_style(Color(0.055, 0.12, 0.24, 0.98), Color(0.25, 0.78, 0.96)))
 	var margin := MarginContainer.new()
