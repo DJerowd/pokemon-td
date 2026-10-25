@@ -121,20 +121,26 @@ func reach_end_of_path() -> void:
 	GameManager.take_damage(1)
 	queue_free()
 
-func try_to_catch() -> void:
+func try_to_catch(ball_override: String = "") -> void:
 	if removed_from_game:
 		return
 	if not can_be_captured:
 		print("%s é um Pokémon especial e não pode ser capturado." % (pokemon_data.species_name if pokemon_data else "Este inimigo"))
 		return
-	var ball_name := GameManager.selected_pokeball
+	var ball_name := ball_override if not ball_override.is_empty() else GameManager.selected_pokeball
 	if ball_name.is_empty() or not GameManager.use_pokeball(ball_name):
 		print("Você não possui essa Pokébola.")
 		return
 	var hp_ratio := clampf(current_hp / max_hp, 0.0, 1.0)
 	var base_chance := 0.35 + (1.0 - hp_ratio) * 0.55
 	var catch_chance := clampf(base_chance * capture_rate * GameManager.get_capture_bonus(ball_name), 0.05, 0.95)
-	if randf() <= catch_chance:
+	var caught := randf() <= catch_chance
+	var hud := get_tree().get_first_node_in_group("battle_hud")
+	if hud and hud.has_method("play_capture_animation"):
+		await hud.call("play_capture_animation", self, ball_name, caught)
+	if not is_instance_valid(self):
+		return
+	if caught:
 		var captured_data: PokemonData
 		if pokemon_data:
 			captured_data = pokemon_data.duplicate(true) as PokemonData
