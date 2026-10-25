@@ -11,6 +11,9 @@ var current_hp: float = 50.0
 var removed_from_game: bool = false
 
 func _ready() -> void:
+	# Desabilitar loop é essencial: com loop ativo, o inimigo volta ao início
+	# do caminho antes que progress_ratio chegue ao fim.
+	loop = false
 	# Se houver dados de espécie, eles definem a vida inicial do inimigo.
 	max_hp = maxf(1.0, pokemon_data.hp) if pokemon_data != null else maxf(1.0, max_hp)
 	current_hp = max_hp
