@@ -272,6 +272,7 @@ func _input(event: InputEvent) -> void:
 			if target:
 				_apply_item_to_tower(pending_item_name, target)
 				pending_item_name = ""
+				drag_preview.visible = false
 
 func _toggle_bag() -> void:
 	if bag_panel.visible:
@@ -362,7 +363,7 @@ func play_capture_animation(target: Node2D, ball_name: String, was_captured: boo
 		for frame_row in [1, 2, 3, 4, 3, 2, 1, 0]:
 			if not is_instance_valid(flight):
 				return
-			flight.texture = _make_atlas(ball_sheet, Rect2(4 + column * 40, 4 + frame_row * 38, 32, 32))
+			flight.texture = _make_atlas(ball_sheet, Rect2(4 + column * 41, 4 + frame_row * 41, 32, 32))
 			await get_tree().create_timer(0.07, true, false, true).timeout
 	var close_tween := create_tween()
 	close_tween.set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
