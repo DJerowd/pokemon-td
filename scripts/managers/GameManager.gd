@@ -154,3 +154,21 @@ func _find_deployed_tower(pokemon: PokemonData) -> Node:
 		if is_instance_valid(candidate) and candidate.get("pokemon_data") == pokemon:
 			return candidate
 	return null
+
+## Reinicia os dados voláteis de uma partida sem alterar os recursos cadastrados.
+func reset_match() -> void:
+	player_money = 100
+	player_lives = 10
+	current_wave = 0
+	pokeballs = 5
+	inventory_items = {"Poção": 3, "Antídoto": 2, "Despertar": 1}
+	pokeball_inventory = {"Poké Bola": 5, "Great Ball": 2, "Ultra Ball": 1}
+	selected_pokeball = "Poké Bola"
+	selected_battle_pokemon = null
+	game_over = false
+	captured_pokemons.clear()
+	active_battle_team.clear()
+	deployed_pokemons.clear()
+	selected_pokemon_to_place = null
+	stats_changed.emit()
+	team_changed.emit()
