@@ -15,7 +15,7 @@ var current_hp: float = 50.0
 var removed_from_game: bool = false
 var anim_timer: float = 0.0
 var anim_frame: int = 0
-var current_direction: int = 0
+var current_direction: int = 3
 var tower_attack_timer: float = 0.0
 var sprite_sheet: Texture2D
 
@@ -45,11 +45,14 @@ func _process(delta: float) -> void:
 	var previous_direction := current_direction
 	var curve := get_parent_curve()
 	if curve:
-		var direction_vector := curve.sample_baked(next_progress) - curve.sample_baked(previous_progress)
-		if absf(direction_vector.x) > absf(direction_vector.y):
-			current_direction = 3 if direction_vector.x >= 0.0 else 2
-		else:
-			current_direction = 0 if direction_vector.y >= 0.0 else 1
+		var direction_vector: Vector2 = curve.sample_baked(next_progress) - curve.sample_baked(previous_progress)
+		# A spritesheet is not rotated: keep a horizontal facing direction.
+		# At sharp/vertical turns, retain the last direction instead of
+		# rapidly switching to side/upside-down frames due to curve jitter.
+		var horizontal_strength := absf(direction_vector.x)
+		var vertical_strength := absf(direction_vector.y)
+		if horizontal_strength > vertical_strength * 1.35 and horizontal_strength > 0.05:
+			current_direction = 3 if direction_vector.x > 0.0 else 2
 	if current_direction != previous_direction:
 		_update_sprite()
 	anim_timer += delta
