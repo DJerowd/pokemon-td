@@ -22,7 +22,7 @@ var wave_rosters: Array = [
 		{"name":"Bulbasaur","origin":Vector2(0, 32),"hp":40,"speed":90.0,"capturable":true,"capture_rate":0.85,"reward":25,"type":PokemonData.Type.GRASS},
 		{"name":"Charmander","origin":Vector2(256, 32),"hp":36,"speed":112.0,"capturable":true,"capture_rate":0.8,"reward":25,"type":PokemonData.Type.FIRE},
 		{"name":"Squirtle","origin":Vector2(448, 32),"hp":48,"speed":82.0,"capturable":true,"capture_rate":0.9,"reward":30,"type":PokemonData.Type.WATER},
-		{"name":"Chikorita","origin":Vector2(0, 128),"hp":55,"speed":76.0,"capturable":true,"capture_rate":0.7,"reward":35,"type":PokemonData.Type.GRASS},
+		{"name":"Chikorita","origin":Vector2(0, 128),"hp":55,"speed":76.0,"capturable":true,"capture_rate":0.7,"reward":35,"type":PokemonData.Type.GRASS,"status":"Envenenado"},
 		{"name":"Rival Bulbasaur","origin":Vector2(0, 32),"hp":90,"speed":72.0,"capturable":false,"capture_rate":0.0,"reward":70,"type":PokemonData.Type.GRASS}
 	],
 	[
@@ -30,20 +30,20 @@ var wave_rosters: Array = [
 		{"name":"Totodile","origin":Vector2(384, 128),"hp":72,"speed":84.0,"capturable":true,"capture_rate":0.75,"reward":40,"type":PokemonData.Type.WATER},
 		{"name":"Treecko","origin":Vector2(192, 2432),"hp":62,"speed":132.0,"capturable":true,"capture_rate":0.7,"reward":40,"type":PokemonData.Type.GRASS},
 		{"name":"Torchic","origin":Vector2(384, 2432),"hp":66,"speed":110.0,"capturable":true,"capture_rate":0.72,"reward":40,"type":PokemonData.Type.FIRE},
-		{"name":"Guardião Johto","origin":Vector2(384, 128),"hp":155,"speed":70.0,"capturable":false,"capture_rate":0.0,"reward":110,"type":PokemonData.Type.WATER}
+		{"name":"Guardião Johto","origin":Vector2(384, 128),"hp":155,"speed":70.0,"capturable":false,"capture_rate":0.0,"reward":110,"type":PokemonData.Type.WATER,"status":"Adormecido"}
 	],
 	[
 		{"name":"Mudkip","origin":Vector2(576, 2432),"hp":84,"speed":88.0,"capturable":true,"capture_rate":0.72,"reward":45,"type":PokemonData.Type.WATER},
 		{"name":"Turtwig","origin":Vector2(0, 3500),"hp":94,"speed":76.0,"capturable":true,"capture_rate":0.7,"reward":50,"type":PokemonData.Type.GRASS},
 		{"name":"Chimchar","origin":Vector2(192, 3500),"hp":78,"speed":126.0,"capturable":true,"capture_rate":0.68,"reward":50,"type":PokemonData.Type.FIRE},
 		{"name":"Piplup","origin":Vector2(384, 3500),"hp":90,"speed":90.0,"capturable":true,"capture_rate":0.68,"reward":50,"type":PokemonData.Type.WATER},
-		{"name":"Sentinela Sinnoh","origin":Vector2(0, 3500),"hp":230,"speed":62.0,"capturable":false,"capture_rate":0.0,"reward":160,"type":PokemonData.Type.GRASS}
+		{"name":"Sentinela Sinnoh","origin":Vector2(0, 3500),"hp":230,"speed":62.0,"capturable":false,"capture_rate":0.0,"reward":160,"type":PokemonData.Type.GRASS,"status":"Envenenado"}
 	],
 	[
 		{"name":"Snivy","origin":Vector2(0, 4800),"hp":102,"speed":140.0,"capturable":true,"capture_rate":0.65,"reward":60,"type":PokemonData.Type.GRASS},
 		{"name":"Tepig","origin":Vector2(192, 4800),"hp":118,"speed":98.0,"capturable":true,"capture_rate":0.65,"reward":60,"type":PokemonData.Type.FIRE},
 		{"name":"Oshawott","origin":Vector2(384, 4800),"hp":108,"speed":112.0,"capturable":true,"capture_rate":0.65,"reward":60,"type":PokemonData.Type.WATER},
-		{"name":"Elite Unova","origin":Vector2(384, 4800),"hp":320,"speed":68.0,"capturable":false,"capture_rate":0.0,"reward":220,"type":PokemonData.Type.WATER}
+		{"name":"Elite Unova","origin":Vector2(384, 4800),"hp":320,"speed":68.0,"capturable":false,"capture_rate":0.0,"reward":220,"type":PokemonData.Type.WATER,"status":"Adormecido"}
 	]
 ]
 
@@ -111,7 +111,7 @@ func _spawn_single_enemy() -> void:
 	wild_data.hp = float(profile.get("hp", 50.0))
 	wild_data.current_hp = wild_data.hp
 	wild_data.attack = 8.0 + current_wave * 2.0
-	wild_data.primary_type = int(profile.get("type", PokemonData.Type.NORMAL)) as PokemonData.Type
+	wild_data.primary_type = int(profile.get("type", PokemonData.Type.NORMAL))
 	wild_data.available_moves = ["Investida", "Ataque Rápido", "", ""]
 	enemy.set("pokemon_data", wild_data)
 	enemy.set("max_hp", wild_data.hp)
@@ -119,6 +119,7 @@ func _spawn_single_enemy() -> void:
 	enemy.set("can_be_captured", bool(profile.get("capturable", true)))
 	enemy.set("capture_rate", float(profile.get("capture_rate", 0.75)))
 	enemy.set("reward_money", int(profile.get("reward", 25)))
+	enemy.set("status_inflicted", str(profile.get("status", "")))
 	enemy.set("progress_ratio", 0.0)
 	path_node.add_child(enemy)
 	enemies_to_spawn = spawn_queue.size()
