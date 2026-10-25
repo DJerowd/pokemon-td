@@ -153,14 +153,19 @@ func open_tower_inspector() -> void:
 	var current_scene := get_tree().current_scene
 	if current_scene == null:
 		return
-	for child in current_scene.get_children():
+	var ui_layer := current_scene.find_child("UI", true, false) as CanvasLayer
+	if ui_layer == null:
+		ui_layer = CanvasLayer.new()
+		ui_layer.name = "TowerInspectorLayer"
+		current_scene.add_child(ui_layer)
+	for child in ui_layer.get_children():
 		if child is Control and child.get_script() == load("res://scenes/ui/TowerInspectorMenu.gd"):
 			child.queue_free()
 	var menu := inspector_scene.instantiate() as Control
 	menu.set("target_pokemon", pokemon_data)
 	menu.set("target_tower", self)
 	menu.z_index = 100
-	current_scene.add_child(menu)
+	ui_layer.add_child(menu)
 
 func _exit_tree() -> void:
 	if pokemon_data:
