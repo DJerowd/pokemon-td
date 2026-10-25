@@ -161,6 +161,7 @@ func _on_yes_pressed() -> void:
 	starter_data.sprite_origin = selected_pokemon_info.get("sprite_origin", Vector2.ZERO)
 	starter_data.sprite = _create_starter_texture(selected_pokemon_info)
 	starter_data.hp = float(selected_pokemon_info.get("hp", 45))
+	starter_data.current_hp = starter_data.hp
 	starter_data.attack = float(selected_pokemon_info.get("attack", 49))
 	var type_name := str(selected_pokemon_info.get("type", ""))
 	if type_name.contains("Fogo"):
