@@ -108,7 +108,11 @@ func try_to_catch() -> void:
 	var base_chance := 0.35 + (1.0 - hp_ratio) * 0.55
 	var catch_chance := clampf(base_chance * capture_rate * GameManager.get_capture_bonus(ball_name), 0.05, 0.95)
 	if randf() <= catch_chance:
-		var captured_data := pokemon_data.duplicate(true) as PokemonData if pokemon_data else PokemonData.new()
+		var captured_data: PokemonData
+		if pokemon_data:
+			captured_data = pokemon_data.duplicate(true) as PokemonData
+		else:
+			captured_data = PokemonData.new()
 		if captured_data.species_name.is_empty():
 			captured_data.species_name = "Pokémon selvagem"
 		captured_data.current_hp = maxf(1.0, minf(current_hp, captured_data.hp))
