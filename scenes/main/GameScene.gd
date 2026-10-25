@@ -1,35 +1,50 @@
 extends Node2D
 
-@export var enemy_scene: PackedScene # Arraste Enemy.tscn aqui no Inspector
-@export var tower_scene: PackedScene # Arraste PokemonTower.tscn aqui no Inspector
+@export var enemy_scene: PackedScene
+@export var tower_scene: PackedScene
 
-@onready var path_node = $MapWorld/TileMapLayer/Path2D
-@onready var enemies_container = $MapWorld/Enemies
-@onready var towers_container = $MapWorld/Towers
+@onready var path_node: Path2D = $MapWorld/TileMapLayer/Path2D
+@onready var enemies_container: Node2D = $MapWorld/Enemies
+@onready var towers_container: Node2D = $MapWorld/Towers
 @onready var wave_manager = $Managers/WaveManager
-@onready var btn_start_wave = $UI/HUD/TopBar/BtnStartWave
+@onready var btn_start_wave: Button = $UI/HUD/TopBar/BtnStartWave
 
 func _ready() -> void:
-	if wave_manager:
-		wave_manager.enemy_scene = enemy_scene
-		wave_manager.path_node = path_node
-		
-		# Conecta o sinal de onda concluída para reativar o botão
-		if not wave_manager.is_connected("wave_completed", _on_wave_completed):
-			wave_manager.connect("wave_completed", _on_wave_completed)
-	
+	if wave_manager == null:
+		push_error("GameScene: WaveManager não encontrado.")
+		return
+
+	wave_manager.enemy_scene = enemy_scene
+	wave_manager.path_node = path_node
+	wave_manager.wave_completed.connect(_on_wave_completed)
+	wave_manager.wave_start_failed.connect(_on_wave_start_failed)
+
 	if btn_start_wave:
-		if not btn_start_wave.pressed.is_connected(_on_btn_start_wave_pressed):
-			btn_start_wave.pressed.connect(_on_btn_start_wave_pressed)
+		btn_start_wave.pressed.connect(_on_btn_start_wave_pressed)
+	GameManager.game_over_reached.connect(_on_game_over_reached)
+	GameManager.stats_changed.connect(_refresh_hud_state)
+	_refresh_hud_state()
 
 func _on_btn_start_wave_pressed() -> void:
-	if wave_manager and wave_manager.has_method("start_next_wave"):
-		GameManager.current_wave += 1
+	if wave_manager == null or GameManager.game_over:
+		return
+	if wave_manager.start_next_wave():
 		btn_start_wave.disabled = true
-		print("Iniciando Onda ", GameManager.current_wave)
-		wave_manager.start_next_wave()
+		_refresh_hud_state()
 
 func _on_wave_completed() -> void:
+	_refresh_hud_state()
+	print("Onda concluída; botão liberado para a próxima.")
+
+func _on_wave_start_failed(message: String) -> void:
+	push_warning(message)
+	_refresh_hud_state()
+
+func _on_game_over_reached() -> void:
 	if btn_start_wave:
-		btn_start_wave.disabled = false # Reativa o botão para a próxima onda
-		print("Botão de iniciar onda liberado!")
+		btn_start_wave.disabled = true
+	print("Fim de jogo. Reinicie a partida para tentar novamente.")
+
+func _refresh_hud_state() -> void:
+	if btn_start_wave:
+		btn_start_wave.disabled = GameManager.game_over or (wave_manager != null and wave_manager.is_wave_active)
