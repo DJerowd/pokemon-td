@@ -1,4 +1,4 @@
-class_name StarterDatabase
+# Catálogo legado; a classe global StarterDatabase é definida em scripts/data/StarterDatabase.gd.
 extends Node
 
 # Estatísticas base oficiais de cada inicial. sprite_origin = Vector2(-1, -1)
