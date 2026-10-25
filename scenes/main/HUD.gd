@@ -33,6 +33,7 @@ var menu_panel: PanelContainer
 var pending_item_name: String = ""
 var drag_preview: Control
 var bag_sheet: Texture2D
+var bag_icon_texture: AtlasTexture
 var item_sheet: Texture2D
 var ball_sheet: Texture2D
 
@@ -100,12 +101,20 @@ func _create_bag_button() -> void:
 func _create_bag_icon() -> void:
 	if bag_sheet == null or bag_button == null:
 		return
-	var icon_texture := AtlasTexture.new()
-	icon_texture.atlas = bag_sheet
-	icon_texture.region = Rect2(0, 0, 72, 76)
-	bag_button.icon = icon_texture
+	bag_icon_texture = AtlasTexture.new()
+	bag_icon_texture.atlas = bag_sheet
+	bag_icon_texture.region = Rect2(0, 0, 68, 72)
+	bag_button.icon = bag_icon_texture
 	bag_button.text = ""
 	bag_button.icon_alignment = HORIZONTAL_ALIGNMENT_CENTER
+
+func _animate_bag_icon(opening: bool) -> void:
+	if bag_icon_texture == null:
+		return
+	var frames: Array[int] = [0, 68, 136] if opening else [136, 68, 0]
+	for frame_x in frames:
+		bag_icon_texture.region = Rect2(frame_x, 0, 68, 72)
+		await get_tree().create_timer(0.055, true, false, true).timeout
 
 func _create_bag_panel() -> void:
 	bag_panel = PanelContainer.new()
@@ -267,6 +276,7 @@ func _process(_delta: float) -> void:
 func _input(event: InputEvent) -> void:
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
 		if bag_panel.visible and not bag_panel.get_global_rect().has_point(event.position) and not bag_button.get_global_rect().has_point(event.position):
+			_animate_bag_icon(false)
 			bag_panel.hide()
 		if pending_item_name != "" and not bag_panel.get_global_rect().has_point(event.position) and not bag_button.get_global_rect().has_point(event.position):
 			var target := _find_tower_at_screen_position(event.position)
@@ -277,10 +287,12 @@ func _input(event: InputEvent) -> void:
 
 func _toggle_bag() -> void:
 	if bag_panel.visible:
+		_animate_bag_icon(false)
 		bag_panel.hide()
 	else:
 		_rebuild_bag_list()
 		bag_panel.show()
+		_animate_bag_icon(true)
 		if menu_panel.visible:
 			menu_panel.hide()
 
@@ -297,6 +309,7 @@ func _on_inventory_entry_pressed(entry_name: String, kind: String) -> void:
 		pending_item_name = entry_name
 		drag_preview.text = "↘ " + entry_name
 		drag_preview.visible = true
+	_animate_bag_icon(false)
 	bag_panel.hide()
 	update_hud_stats()
 
