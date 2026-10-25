@@ -25,6 +25,7 @@ var sprite_sheet: Texture2D
 
 func _ready() -> void:
 	loop = false
+	rotates = false # O PathFollow2D não deve girar o sprite junto com a tangente da curva.
 	sprite_sheet = load(SPRITE_SHEET_PATH) as Texture2D
 	max_hp = maxf(1.0, pokemon_data.hp) if pokemon_data != null else maxf(1.0, max_hp)
 	current_hp = max_hp
