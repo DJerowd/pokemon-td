@@ -25,7 +25,7 @@ var anim_frame: int = 0
 var anim_timer: float = 0.0
 @export var anim_speed: float = 0.25
 
-var enemies_in_range: Array[Node] = []
+var enemies_in_range: Array[Node2D] = []
 @onready var attack_timer: Timer = $Timer
 @onready var range_area: Area2D = $Area2D
 @onready var click_area: Area2D = $ClickArea
@@ -109,12 +109,12 @@ func _draw() -> void:
 
 func _on_enemy_entered(body: Node2D) -> void:
 	# The Area2D usually detects the enemy's CharacterBody2D child.
-	var enemy: Node = body.get_parent()
+	var enemy := body.get_parent() as Node2D
 	if enemy and enemy.is_in_group("enemies") and not enemies_in_range.has(enemy):
 		enemies_in_range.append(enemy)
 
 func _on_enemy_exited(body: Node2D) -> void:
-	var enemy: Node = body.get_parent()
+	var enemy := body.get_parent() as Node2D
 	enemies_in_range.erase(enemy)
 
 func _on_attack_timeout() -> void:
