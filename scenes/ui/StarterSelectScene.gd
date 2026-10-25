@@ -171,28 +171,8 @@ func on_pokeball_clicked(index: int) -> void:
 func _on_yes_pressed() -> void:
 	if selected_pokemon_info.is_empty():
 		return
-	var starter_data := PokemonData.new()
-	starter_data.id = _species_id(str(selected_pokemon_info.get("name", "Pokémon")))
-	starter_data.species_name = str(selected_pokemon_info.get("name", "Pokémon"))
-	starter_data.level = 5
-	starter_data.sprite_origin = selected_pokemon_info.get("sprite_origin", Vector2.ZERO)
+	var starter_data := StarterDatabase.create_pokemon_data(str(selected_pokemon_info.get("name", "Pokémon")), 5, selected_pokemon_info)
 	starter_data.sprite = _create_starter_texture(selected_pokemon_info)
-	starter_data.hp = float(selected_pokemon_info.get("hp", 45))
-	starter_data.current_hp = starter_data.hp
-	starter_data.attack = float(selected_pokemon_info.get("attack", 49))
-	starter_data.defense = float(selected_pokemon_info.get("defense", 49))
-	starter_data.special_attack = float(selected_pokemon_info.get("special_attack", 49))
-	starter_data.special_defense = float(selected_pokemon_info.get("special_defense", 49))
-	starter_data.speed = float(selected_pokemon_info.get("speed", 45))
-	var type_name := str(selected_pokemon_info.get("type", ""))
-	starter_data.primary_type = _type_from_name(type_name.split("/")[0])
-	starter_data.secondary_type = _type_from_name(type_name.split("/")[1]) if type_name.contains("/") else PokemonData.Type.NONE
-	var starter_moves: Array = selected_pokemon_info.get("moves", ["Investida", "", "", ""])
-	starter_data.available_moves.clear()
-	for move in starter_moves:
-		starter_data.available_moves.append(str(move))
-	while starter_data.available_moves.size() < 4:
-		starter_data.available_moves.append("")
 	GameManager.captured_pokemons.clear()
 	GameManager.capture_pokemon(starter_data)
 	GameManager.active_battle_team.clear()
@@ -214,35 +194,3 @@ func _on_no_pressed() -> void:
 	$HoverPreviewPanel.scale = Vector2.ONE
 	update_ui()
 
-func _type_from_name(type_name: String) -> PokemonData.Type:
-	match type_name.strip_edges():
-		"Fogo":
-			return PokemonData.Type.FIRE
-		"Água":
-			return PokemonData.Type.WATER
-		"Planta":
-			return PokemonData.Type.GRASS
-		"Veneno":
-			return PokemonData.Type.POISON
-		"Voador":
-			return PokemonData.Type.FLYING
-		"Elétrico":
-			return PokemonData.Type.ELECTRIC
-		"Gelo":
-			return PokemonData.Type.ICE
-		"Psíquico":
-			return PokemonData.Type.PSYCHIC
-		"Lutador":
-			return PokemonData.Type.FIGHTING
-		"Terrestre":
-			return PokemonData.Type.GROUND
-		"Inseto":
-			return PokemonData.Type.BUG
-		"Pedra":
-			return PokemonData.Type.ROCK
-		"Fantasma":
-			return PokemonData.Type.GHOST
-		"Dragão":
-			return PokemonData.Type.DRAGON
-		_:
-			return PokemonData.Type.NORMAL
