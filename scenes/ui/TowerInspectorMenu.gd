@@ -55,7 +55,9 @@ func update_ui() -> void:
 	if target_pokemon == null:
 		return
 	lbl_title.text = "%s (Nv. %d)" % [target_pokemon.species_name, target_pokemon.level]
-	lbl_stats.text = "Ataque: %.1f | Defesa: %.1f | Velocidade: %.1f" % [target_pokemon.attack, target_pokemon.defense, target_pokemon.speed]
+	var hp_text := "%.0f/%.0f" % [target_tower.get("current_hp") if target_tower and is_instance_valid(target_tower) else target_pokemon.current_hp, target_pokemon.hp]
+	var status_text := target_pokemon.status_condition if not target_pokemon.status_condition.is_empty() else "Normal"
+	lbl_stats.text = "HP: %s | Atq: %.1f | Def: %.1f | Vel: %.1f\nStatus: %s" % [hp_text, target_pokemon.attack, target_pokemon.defense, target_pokemon.speed, status_text]
 	lbl_item.text = "Item: " + (target_pokemon.held_item if not target_pokemon.held_item.is_empty() else "Nenhum")
 
 	for child in moves_box.get_children():
