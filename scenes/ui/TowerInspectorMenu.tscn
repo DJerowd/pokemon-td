@@ -20,14 +20,17 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
-color = Color(0, 0, 0, 0.35)
+color = Color(0, 0, 0, 0.0)
 
 [node name="InspectorPanel" type="PanelContainer" parent="." unique_id=1928763456]
 layout_mode = 0
+anchor_top = 1.0
+anchor_bottom = 1.0
 offset_left = 18.0
-offset_top = 18.0
-offset_right = 478.0
-offset_bottom = 300.0
+offset_top = -270.0
+offset_right = 518.0
+offset_bottom = -18.0
+grow_vertical = 0
 mouse_filter = 0
 
 [node name="VBoxContainer" type="VBoxContainer" parent="InspectorPanel" unique_id=1639329345]
@@ -48,6 +51,17 @@ text = "item"
 [node name="MovesBox" type="HBoxContainer" parent="InspectorPanel/VBoxContainer" unique_id=602845849]
 layout_mode = 2
 
-[node name="BtnClose" type="Button" parent="InspectorPanel/VBoxContainer" unique_id=445329781]
+[node name="ActionsRow" type="HBoxContainer" parent="InspectorPanel/VBoxContainer" unique_id=445329782]
 layout_mode = 2
-text = "Fechar"
+
+[node name="BtnMove" type="Button" parent="InspectorPanel/VBoxContainer/ActionsRow" unique_id=445329783]
+layout_mode = 2
+text = "MOVER"
+
+[node name="BtnRemove" type="Button" parent="InspectorPanel/VBoxContainer/ActionsRow" unique_id=445329784]
+layout_mode = 2
+text = "RETIRAR"
+
+[node name="BtnClose" type="Button" parent="InspectorPanel/VBoxContainer/ActionsRow" unique_id=445329781]
+layout_mode = 2
+text = "FECHAR"
