@@ -60,6 +60,10 @@ func place_pokemon(pokemon_data: PokemonData) -> bool:
 		push_error("A raiz de PokemonTower.tscn precisa ser Node2D.")
 		return false
 
+	if not GameManager.deploy_pokemon(pokemon_data):
+		tower.free()
+		push_warning("Este Pokémon já está posicionado ou não pertence à equipe ativa.")
+		return false
 	tower.set("pokemon_data", pokemon_data)
 	tower.set("slot_reference", self)
 	tower.z_index = 10
@@ -67,7 +71,5 @@ func place_pokemon(pokemon_data: PokemonData) -> bool:
 	tower.global_position = global_position
 	occupied = true
 	current_tower = tower
-	if not GameManager.deployed_pokemons.has(pokemon_data):
-		GameManager.deployed_pokemons.append(pokemon_data)
 	print("Pokémon ", pokemon_data.species_name, " posicionado.")
 	return true
