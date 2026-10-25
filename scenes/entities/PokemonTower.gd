@@ -33,7 +33,6 @@ var sprite_sheet: Texture2D
 var invalid_sprite_warning_shown: bool = false
 var current_hp: float = 1.0
 var max_hp: float = 1.0
-var status_attack_timer: float = 0.0
 @onready var attack_timer: Timer = $Timer
 @onready var range_area: Area2D = $Area2D
 @onready var click_area: Area2D = $ClickArea
@@ -203,6 +202,9 @@ func open_tower_inspector() -> void:
 
 func _exit_tree() -> void:
 	if pokemon_data:
+		if GameManager.selected_battle_pokemon == pokemon_data:
+			GameManager.selected_battle_pokemon = null
+			GameManager.stats_changed.emit()
 		GameManager.undeploy_pokemon(pokemon_data)
 	if slot_reference and is_instance_valid(slot_reference):
 		slot_reference.occupied = false
