@@ -145,7 +145,8 @@ func deploy_pokemon(pokemon: PokemonData) -> bool:
 	return true
 
 func undeploy_pokemon(pokemon: PokemonData) -> void:
-	if deployed_pokemons.erase(pokemon):
+	if deployed_pokemons.has(pokemon):
+		deployed_pokemons.erase(pokemon)
 		team_changed.emit()
 
 func _find_deployed_tower(pokemon: PokemonData) -> Node:
