@@ -1,5 +1,8 @@
 extends Node2D
 
+const SPRITE_FACTORY = preload("res://scripts/data/SpriteFrameFactory.gd")
+const SPRITE_SHEET_PATH := "res://assets/textures/DS _ DSi - Pokemon Black 2 _ White 2 - Overworld - Pokemon (Overworld).png"
+
 enum Direction { DOWN = 0, UP = 1, LEFT = 2, RIGHT = 3 }
 
 @export var pokemon_data: PokemonData:
@@ -13,7 +16,6 @@ enum Direction { DOWN = 0, UP = 1, LEFT = 2, RIGHT = 3 }
 		if is_node_ready():
 			_apply_stats()
 			update_sprite_texture()
-			queue_redraw()
 
 var slot_reference: Area2D = null
 var damage: float = 20.0
@@ -23,9 +25,11 @@ var is_selected: bool = false
 var current_direction: Direction = Direction.DOWN
 var anim_frame: int = 0
 var anim_timer: float = 0.0
-@export var anim_speed: float = 0.25
+@export var anim_speed: float = 0.22
+@export var sprite_display_size: float = 48.0
 
 var enemies_in_range: Array = []
+var sprite_sheet: Texture2D
 var invalid_sprite_warning_shown: bool = false
 @onready var attack_timer: Timer = $Timer
 @onready var range_area: Area2D = $Area2D
@@ -33,18 +37,17 @@ var invalid_sprite_warning_shown: bool = false
 @onready var sprite: Sprite2D = $Sprite2D
 
 func _ready() -> void:
-	# Usa a textura atribuída em PokemonData. Não carregue um caminho fixo:
-	# a ausência de um sprite opcional não deve interromper o combate.
-	if sprite and pokemon_data and pokemon_data.sprite:
-		sprite.texture = pokemon_data.sprite
+	sprite_sheet = load(SPRITE_SHEET_PATH) as Texture2D
+	if sprite:
+		sprite.centered = true
+		sprite.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	_apply_stats()
-
 	if attack_timer:
 		attack_timer.one_shot = false
 		if not attack_timer.timeout.is_connected(_on_attack_timeout):
 			attack_timer.timeout.connect(_on_attack_timeout)
+		attack_timer.wait_time = attack_cooldown
 		attack_timer.start()
-
 	if range_area:
 		if not range_area.body_entered.is_connected(_on_enemy_entered):
 			range_area.body_entered.connect(_on_enemy_entered)
@@ -57,59 +60,57 @@ func _ready() -> void:
 func _apply_stats() -> void:
 	if attack_timer:
 		attack_timer.wait_time = attack_cooldown
-	# CollisionShape2D for the range should be a CircleShape2D; its radius
-	# follows the same data value used by the visible range indicator.
-	if range_area:
+	if range_area and pokemon_data:
 		var shape_node := range_area.get_node_or_null("CollisionShape2D") as CollisionShape2D
-		if shape_node and shape_node.shape is CircleShape2D and pokemon_data:
+		if shape_node and shape_node.shape is CircleShape2D:
 			shape_node.shape = shape_node.shape.duplicate()
 			(shape_node.shape as CircleShape2D).radius = pokemon_data.attack_range
 
 func _process(delta: float) -> void:
 	enemies_in_range = enemies_in_range.filter(func(enemy): return is_instance_valid(enemy) and not enemy.is_queued_for_deletion())
-	if enemies_in_range.is_empty():
-		return
-	var target := enemies_in_range[0] as Node2D
-	var direction_vector: Vector2 = target.global_position - global_position
-	if absf(direction_vector.x) > absf(direction_vector.y):
-		set_direction(Direction.LEFT if direction_vector.x < 0.0 else Direction.RIGHT)
-	else:
-		set_direction(Direction.UP if direction_vector.y < 0.0 else Direction.DOWN)
+	# A animação precisa continuar mesmo sem inimigos no alcance.
+	if not enemies_in_range.is_empty():
+		var target := enemies_in_range[0] as Node2D
+		if target:
+			var direction_vector: Vector2 = target.global_position - global_position
+			if absf(direction_vector.x) > absf(direction_vector.y):
+				set_direction(Direction.LEFT if direction_vector.x < 0.0 else Direction.RIGHT)
+			else:
+				set_direction(Direction.UP if direction_vector.y < 0.0 else Direction.DOWN)
 	anim_timer += delta
-	if anim_timer >= anim_speed:
-		anim_timer = 0.0
+	if anim_timer >= maxf(0.05, anim_speed):
+		anim_timer = fmod(anim_timer, maxf(0.05, anim_speed))
 		anim_frame = (anim_frame + 1) % 2
 		update_sprite_texture()
 
 func set_direction(new_direction: Direction) -> void:
 	if current_direction != new_direction:
 		current_direction = new_direction
+		anim_frame = 0
 		update_sprite_texture()
 
 func update_sprite_texture() -> void:
-	if not pokemon_data or not sprite:
+	if not pokemon_data or not sprite or sprite_sheet == null:
 		return
-	# O recorte por atlas só é possível quando há textura e coordenadas válidas.
-	if pokemon_data.sprite != null and sprite.texture != pokemon_data.sprite:
-		sprite.texture = pokemon_data.sprite
-	if sprite.texture is AtlasTexture:
-		var atlas := sprite.texture as AtlasTexture
-		var row := int(current_direction)
-		if current_direction == Direction.RIGHT:
-			row = int(Direction.LEFT)
-			sprite.flip_h = true
-		else:
-			sprite.flip_h = false
-		var requested_region: Rect2 = pokemon_data.get_frame_region(row, anim_frame)
-		var atlas_size: Vector2 = atlas.atlas.get_size() if atlas.atlas else Vector2.ZERO
-		# Nunca aplique regiões fora da imagem: alguns offsets antigos da base
-		# de iniciais pertencem a outra versão de sprite sheet.
-		if requested_region.position.x < 0.0 or requested_region.position.y < 0.0 or requested_region.end.x > atlas_size.x or requested_region.end.y > atlas_size.y:
-			if not invalid_sprite_warning_shown:
-				push_warning("Sprite fora dos limites para %s; confira sprite_origin e frame_size em PokemonData." % pokemon_data.species_name)
-				invalid_sprite_warning_shown = true
-			return
-		atlas.region = requested_region
+	var frame_size := pokemon_data.frame_size
+	if frame_size.x <= 0.0 or frame_size.y <= 0.0:
+		frame_size = Vector2(32, 32)
+	var frame_rect := pokemon_data.get_frame_region(int(current_direction), anim_frame)
+	if frame_rect.position.x < 0.0 or frame_rect.position.y < 0.0 or frame_rect.end.x > sprite_sheet.get_width() or frame_rect.end.y > sprite_sheet.get_height():
+		if not invalid_sprite_warning_shown:
+			push_warning("Sprite fora dos limites para %s; confira sprite_origin/frame_size." % pokemon_data.species_name)
+			invalid_sprite_warning_shown = true
+		return
+	var texture := SPRITE_FACTORY.make_frame(sprite_sheet, frame_rect)
+	if texture == null:
+		return
+	sprite.texture = texture
+	# Cada frame continua com o mesmo canvas-base. A escala é calculada para
+	# que espécies de desenhos diferentes tenham dimensões visuais consistentes.
+	var largest_dimension := maxf(frame_size.x, frame_size.y)
+	var scale_factor := sprite_display_size / maxf(1.0, largest_dimension)
+	sprite.scale = Vector2(scale_factor, scale_factor)
+	sprite.flip_h = false
 
 func _draw() -> void:
 	if is_selected and pokemon_data:
@@ -118,7 +119,6 @@ func _draw() -> void:
 		draw_arc(Vector2.ZERO, radius, 0.0, TAU, 64, Color(0.102, 0.902, 1.0, 0.8), 2.0)
 
 func _on_enemy_entered(body: Node2D) -> void:
-	# A Area2D normalmente detecta o CharacterBody2D filho do inimigo.
 	var enemy := body.get_parent() as Node2D
 	if enemy and enemy.is_in_group("enemies") and not enemies_in_range.has(enemy):
 		enemies_in_range.append(enemy)
@@ -131,13 +131,10 @@ func _on_attack_timeout() -> void:
 	enemies_in_range = enemies_in_range.filter(func(enemy): return is_instance_valid(enemy) and not enemy.is_queued_for_deletion())
 	if enemies_in_range.is_empty():
 		return
-	# A lista é não tipada, então declare Variant explicitamente para
-	# evitar falha de inferência do parser ao recuperar o alvo.
 	var target: Variant = enemies_in_range[0]
 	if target != null and is_instance_valid(target) and target.has_method("take_damage"):
 		current_move = pokemon_data.get_active_move() if pokemon_data else "Investida"
 		target.call("take_damage", damage)
-		print("%s usou %s e causou %.1f de dano." % [pokemon_data.species_name if pokemon_data else "Torre", current_move, damage])
 
 func _on_click_area_input_event(_viewport: Viewport, event: InputEvent, _shape_idx: int) -> void:
 	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
@@ -153,15 +150,17 @@ func open_tower_inspector() -> void:
 	if inspector_scene == null:
 		push_warning("Cena TowerInspectorMenu.tscn não encontrada.")
 		return
-	# Evita abrir vários inspetores para a mesma torre.
-	for child in get_tree().current_scene.get_children():
+	var current_scene := get_tree().current_scene
+	if current_scene == null:
+		return
+	for child in current_scene.get_children():
 		if child is Control and child.get_script() == load("res://scenes/ui/TowerInspectorMenu.gd"):
-			if child.get("target_tower") == self:
-				child.queue_free()
-	var menu = inspector_scene.instantiate()
-	menu.target_pokemon = pokemon_data
-	menu.target_tower = self
-	get_tree().current_scene.add_child(menu)
+			child.queue_free()
+	var menu := inspector_scene.instantiate() as Control
+	menu.set("target_pokemon", pokemon_data)
+	menu.set("target_tower", self)
+	menu.z_index = 100
+	current_scene.add_child(menu)
 
 func _exit_tree() -> void:
 	if pokemon_data:
