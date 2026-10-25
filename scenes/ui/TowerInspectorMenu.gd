@@ -9,13 +9,17 @@ var target_tower: Node2D = null
 @onready var lbl_stats: Label = $InspectorPanel/VBoxContainer/LblStats
 @onready var lbl_item: Label = $InspectorPanel/VBoxContainer/LblItem
 @onready var moves_box: HBoxContainer = $InspectorPanel/VBoxContainer/MovesBox
-@onready var btn_close: Button = $InspectorPanel/VBoxContainer/BtnClose
+@onready var btn_move: Button = $InspectorPanel/VBoxContainer/ActionsRow/BtnMove
+@onready var btn_remove: Button = $InspectorPanel/VBoxContainer/ActionsRow/BtnRemove
+@onready var btn_close: Button = $InspectorPanel/VBoxContainer/ActionsRow/BtnClose
 
 func _ready() -> void:
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	z_index = 100
 	mouse_filter = Control.MOUSE_FILTER_PASS
 	_style_inspector()
+	btn_move.pressed.connect(_on_move_pressed)
+	btn_remove.pressed.connect(_on_remove_pressed)
 	btn_close.pressed.connect(_close_menu)
 	if target_pokemon:
 		update_ui()
@@ -36,6 +40,8 @@ func _style_inspector() -> void:
 	lbl_title.add_theme_color_override("font_color", Color(0.35, 0.9, 1.0))
 	lbl_stats.add_theme_color_override("font_color", Color(0.92, 0.96, 1.0))
 	lbl_item.add_theme_color_override("font_color", Color(0.72, 0.9, 1.0))
+	btn_move.text = "MOVER"
+	btn_remove.text = "RETIRAR"
 	btn_close.text = "FECHAR"
 
 func _close_menu() -> void:
@@ -79,3 +85,29 @@ func _on_move_selected(index: int) -> void:
 	target_pokemon.active_move_index = index
 	# PokemonTower consulta o golpe ativo nos dados a cada ataque.
 	update_ui()
+
+func _remove_target_tower() -> void:
+	if target_tower == null or not is_instance_valid(target_tower):
+		return
+	var tower := target_tower
+	target_tower = null
+	var parent := tower.get_parent()
+	if parent:
+		parent.remove_child(tower)
+	tower.free()
+
+func _on_move_pressed() -> void:
+	if target_pokemon == null or target_tower == null or not is_instance_valid(target_tower):
+		_close_menu()
+		return
+	var pokemon_to_move := target_pokemon
+	_remove_target_tower()
+	GameManager.selected_pokemon_to_place = pokemon_to_move
+	GameManager.team_changed.emit()
+	queue_free()
+
+func _on_remove_pressed() -> void:
+	GameManager.selected_pokemon_to_place = null
+	_remove_target_tower()
+	GameManager.team_changed.emit()
+	queue_free()
