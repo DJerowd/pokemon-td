@@ -29,8 +29,9 @@ func _ready() -> void:
 
 func update_ui() -> void:
 	var generation: Dictionary = StarterDatabase.generations[current_gen_index]
-	title_label.text = "--- %s ---" % generation["region"]
+	title_label.text = "--- %s ---" % str(generation.get("region", "Região desconhecida"))
 	if not waiting_for_confirmation:
+		choices_container.hide()
 		dialogue_label.text = "Escolha um Pokémon contido na Pokébola."
 	preview_name.text = ""
 	preview_sprite.texture = null
@@ -50,18 +51,35 @@ func change_generation(direction: int) -> void:
 func on_pokeball_hover(index: int) -> void:
 	if waiting_for_confirmation:
 		return
-	var starter: Dictionary = StarterDatabase.generations[current_gen_index]["starters"][index]
-	dialogue_label.text = "Contém %s (%s)." % [starter["name"], starter["type"]]
-	preview_name.text = starter["name"]
+	var generation: Dictionary = StarterDatabase.generations[current_gen_index]
+	var starters: Array = generation.get("starters", [])
+	if index < 0 or index >= starters.size():
+		return
+	var starter: Variant = starters[index]
+	if not starter is Dictionary:
+		push_warning("Dados inválidos para o Pokémon inicial no índice %d." % index)
+		return
+	var starter_name: String = str(starter.get("name", "Pokémon desconhecido"))
+	var starter_type: String = str(starter.get("type", "Tipo desconhecido"))
+	dialogue_label.text = "Contém %s (%s)." % [starter_name, starter_type]
+	preview_name.text = starter_name
 	# O banco guarda a coordenada do sprite, não a imagem. Até uma textura
 	# válida ser configurada no recurso, o preview permanece sem textura.
 
 func on_pokeball_clicked(index: int) -> void:
 	if waiting_for_confirmation:
 		return
-	selected_pokemon_info = StarterDatabase.generations[current_gen_index]["starters"][index]
+	var generation: Dictionary = StarterDatabase.generations[current_gen_index]
+	var starters: Array = generation.get("starters", [])
+	if index < 0 or index >= starters.size():
+		return
+	var starter: Variant = starters[index]
+	if not starter is Dictionary or not starter.has("name"):
+		push_warning("Não foi possível selecionar o Pokémon: dados incompletos.")
+		return
+	selected_pokemon_info = starter
 	waiting_for_confirmation = true
-	dialogue_label.text = "Deseja escolher %s?" % selected_pokemon_info["name"]
+	dialogue_label.text = "Deseja escolher %s?" % str(selected_pokemon_info.get("name", "este Pokémon"))
 	choices_container.show()
 
 func _on_yes_pressed() -> void:
@@ -96,6 +114,7 @@ func _species_id(species_name: String) -> int:
 	return absi(species_name.to_lower().hash()) % 100000
 
 func _on_no_pressed() -> void:
+	# Cancelar a confirmação limpa o estado temporário e devolve a seleção.
 	waiting_for_confirmation = false
 	selected_pokemon_info.clear()
 	choices_container.hide()
