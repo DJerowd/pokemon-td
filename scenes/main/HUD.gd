@@ -35,10 +35,10 @@ var drag_preview: Control
 var bag_sheet: Texture2D
 var item_sheet: Texture2D
 var ball_sheet: Texture2D
-var outside_click_guard: bool = false
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
+	mouse_filter = Control.MOUSE_FILTER_PASS
 	add_to_group("battle_hud")
 	update_hud_stats()
 	GameManager.stats_changed.connect(update_hud_stats)
@@ -176,7 +176,7 @@ func _get_inventory_icon(entry_name: String, kind: String) -> Texture2D:
 		if ball_sheet == null:
 			return null
 		var col := int(BALL_COLUMN.get(entry_name, 3))
-		return _make_atlas(ball_sheet, Rect2(4 + col * 40, 4, 32, 32))
+		return _make_atlas(ball_sheet, Rect2(4 + col * 41, 4, 32, 32))
 	if item_sheet == null:
 		return null
 	var index := int(ITEM_ICON_INDEX.get(entry_name, 0))
@@ -294,6 +294,7 @@ func _on_inventory_entry_pressed(entry_name: String, kind: String) -> void:
 			return
 		pending_item_name = entry_name
 		drag_preview.text = "↘ " + entry_name
+		drag_preview.visible = true
 	bag_panel.hide()
 	update_hud_stats()
 
@@ -324,13 +325,13 @@ func _give_up() -> void:
 	GameManager.reset_match()
 	get_tree().change_scene_to_file(STARTER_SCENE_PATH)
 
-func play_capture_animation(target: Node2D, ball_name: String) -> void:
+func play_capture_animation(target: Node2D, ball_name: String, was_captured: bool) -> void:
 	if not is_instance_valid(target):
 		return
 	var start := bag_button.get_global_rect().get_center()
 	var target_world := target.global_position
 	var camera := get_viewport().get_camera_2d()
-	var target_screen := get_viewport().get_canvas_transform() * target_world
+	var target_screen: Vector2 = get_viewport().get_canvas_transform() * target_world
 	if camera == null:
 		target_screen = get_viewport().get_mouse_position()
 	var flight := TextureRect.new()
@@ -343,7 +344,7 @@ func play_capture_animation(target: Node2D, ball_name: String) -> void:
 	flight.z_index = 200
 	var column := int(BALL_COLUMN.get(ball_name, 3))
 	if ball_sheet:
-		flight.texture = _make_atlas(ball_sheet, Rect2(4 + column * 40, 4, 32, 32))
+		flight.texture = _make_atlas(ball_sheet, Rect2(4 + column * 41, 4, 32, 32))
 	else:
 		var fallback := Label.new()
 		fallback.text = "🔴"
@@ -370,6 +371,36 @@ func play_capture_animation(target: Node2D, ball_name: String) -> void:
 	await close_tween.finished
 	if is_instance_valid(flight):
 		flight.queue_free()
+	if was_captured:
+		var result_label := Label.new()
+		result_label.text = "CAPTURADO!"
+		result_label.position = target_screen + Vector2(-55, -42)
+		result_label.z_index = 220
+		result_label.add_theme_font_size_override("font_size", 18)
+		result_label.add_theme_color_override("font_color", Color(0.55, 1.0, 0.58))
+		result_label.add_theme_color_override("font_shadow_color", Color.BLACK)
+		result_label.add_theme_constant_override("shadow_offset_x", 2)
+		result_label.add_theme_constant_override("shadow_offset_y", 2)
+		add_child(result_label)
+		var result_tween := create_tween()
+		result_tween.set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
+		result_tween.tween_property(result_label, "position:y", result_label.position.y - 24.0, 0.45)
+		result_tween.parallel().tween_property(result_label, "modulate:a", 0.0, 0.75)
+		result_tween.tween_callback(result_label.queue_free)
+	else:
+		var result_label := Label.new()
+		result_label.text = "ESCAPOU!"
+		result_label.position = target_screen + Vector2(-45, -42)
+		result_label.z_index = 220
+		result_label.add_theme_font_size_override("font_size", 18)
+		result_label.add_theme_color_override("font_color", Color(1.0, 0.75, 0.45))
+		result_label.add_theme_color_override("font_shadow_color", Color.BLACK)
+		add_child(result_label)
+		var result_tween := create_tween()
+		result_tween.set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
+		result_tween.tween_property(result_label, "position:y", result_label.position.y - 16.0, 0.35)
+		result_tween.parallel().tween_property(result_label, "modulate:a", 0.0, 0.65)
+		result_tween.tween_callback(result_label.queue_free)
 
 func _find_tower_at_screen_position(screen_position: Vector2) -> Node:
 	var world_position := get_viewport().get_canvas_transform().affine_inverse() * screen_position
@@ -377,7 +408,7 @@ func _find_tower_at_screen_position(screen_position: Vector2) -> Node:
 	query.position = world_position
 	query.collide_with_areas = true
 	query.collide_with_bodies = true
-	var hits := get_world_2d().direct_space_state.intersect_point(query, 16)
+	var hits := get_viewport().world_2d.direct_space_state.intersect_point(query, 16)
 	for hit in hits:
 		var collider := hit.get("collider") as Node
 		if collider == null:
