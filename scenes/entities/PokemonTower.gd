@@ -33,6 +33,7 @@ var sprite_sheet: Texture2D
 var invalid_sprite_warning_shown: bool = false
 var current_hp: float = 1.0
 var max_hp: float = 1.0
+var status_effect_timer: float = 0.0
 @onready var attack_timer: Timer = $Timer
 @onready var range_area: Area2D = $Area2D
 @onready var click_area: Area2D = $ClickArea
@@ -84,11 +85,28 @@ func _process(delta: float) -> void:
 				set_direction(Direction.LEFT if direction_vector.x < 0.0 else Direction.RIGHT)
 			else:
 				set_direction(Direction.UP if direction_vector.y < 0.0 else Direction.DOWN)
+	_update_status_effects(delta)
 	anim_timer += delta
 	if anim_timer >= maxf(0.05, anim_speed):
 		anim_timer = fmod(anim_timer, maxf(0.05, anim_speed))
 		anim_frame = (anim_frame + 1) % 2
 		update_sprite_texture()
+
+func _update_status_effects(delta: float) -> void:
+	if pokemon_data == null:
+		return
+	if pokemon_data.status_condition == "Envenenado":
+		status_effect_timer += delta
+		if status_effect_timer >= 2.0:
+			status_effect_timer = 0.0
+			take_damage(3.0)
+	else:
+		status_effect_timer = 0.0
+	var is_asleep := pokemon_data.status_condition == "Adormecido"
+	if is_asleep and attack_timer and not attack_timer.is_stopped():
+		attack_timer.stop()
+	elif not is_asleep and attack_timer and attack_timer.is_stopped() and current_hp > 0.0:
+		attack_timer.start()
 
 func set_direction(new_direction: Direction) -> void:
 	if current_direction != new_direction:
