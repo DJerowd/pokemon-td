@@ -144,3 +144,58 @@ A torre usa `Area2D` para saber quando corpos entram ou saem do alcance. A área
 3. Verifique se o inspetor está na parte inferior e se a câmera foca a torre sem escurecer o campo de visão.
 4. Navegue pelas nove gerações e confirme nomes, tipos e estatísticas; sprites sem recorte cadastrado devem deixar a prévia vazia, não mostrar uma espécie errada.
 5. Observe inimigos em curvas fechadas e confirme que os sprites não ficam de cabeça para baixo nem oscilam entre direções em trechos quase verticais.
+
+
+## Bolsa, itens, Pokébolas e menu de partida
+
+- A HUD ocupa a viewport; o botão **Menu** fica na barra superior. O menu permite continuar, reiniciar a partida ou desistir com confirmação.
+- A bolsa fica no canto inferior direito. Ela lista os itens de cura/status e as Pokébolas com quantidades disponíveis; clicar em um item prepara seu uso, e arrastar o item para uma torre aplica o efeito.
+- Para capturar com uma bola específica, arraste a Pokébola da bolsa até um inimigo. A bola voa em direção ao alvo e mostra o resultado da tentativa. Também é possível selecionar a bola na bolsa e clicar diretamente em um inimigo para usar a bola selecionada.
+- Os scripts esperam os PNGs opcionais em `assets/ui/pokemon_items.png`, `assets/ui/pokemon_bags.png` e `assets/ui/pokeballs_bw.png`. Veja `assets/ui/README.md` para os links originais e a configuração dos recortes. Sem esses arquivos, os controles usam rótulos de texto como alternativa.
+- A imagem de referência de fontes não é uma fonte pronta para Godot. Para usar os glifos reais, é necessário obter uma fonte compatível ou converter a folha em fonte bitmap com descritor de caracteres.
+
+## Como configurar inimigos e sprites
+
+### 1. Definir quais inimigos aparecem em cada onda
+
+Abra `scenes/main/WaveManager.gd` e edite `wave_rosters`. Cada elemento do array representa uma onda, e cada dicionário representa um Pokémon que será criado naquela ordem. Campos usados atualmente:
+
+- `name`: nome exibido/armazenado para a espécie.
+- `origin`: coordenada superior esquerda do frame na spritesheet.
+- `hp`: HP inicial.
+- `speed`: velocidade ao percorrer o caminho.
+- `capturable`: permite ou bloqueia a captura.
+- `capture_rate`: multiplicador da chance de captura.
+- `reward`: dinheiro concedido quando o inimigo é derrotado.
+- `type`: tipo primário do Pokémon.
+- `status`: condição de status aplicada ao atacar uma torre, por exemplo `Envenenado` ou `Adormecido`.
+
+Exemplo de um inimigo capturável:
+
+```gdscript
+{"name": "Pikachu", "origin": Vector2(0, 0), "hp": 55,
+ "speed": 125.0, "capturable": true, "capture_rate": 0.8,
+ "reward": 40, "type": PokemonData.Type.ELECTRIC}
+```
+
+Exemplo de inimigo especial não capturável:
+
+```gdscript
+{"name": "Chefe Elétrico", "origin": Vector2(0, 0), "hp": 350,
+ "speed": 65.0, "capturable": false, "capture_rate": 0.0,
+ "reward": 200, "type": PokemonData.Type.ELECTRIC,
+ "status": "Adormecido"}
+```
+
+### 2. Ajustar o sprite do inimigo
+
+O recorte usa a spritesheet definida por `SPRITE_SHEET_PATH` em `scenes/entities/Enemy.gd`. O valor `origin` do roster é passado para `PokemonData.sprite_origin`; o tamanho atual de cada frame é `Vector2(32, 32)`. Para trocar a espécie visual, confirme na imagem que o frame de 32×32 começa exatamente na coordenada escolhida e que os frames de animação/direção existem. Um recorte incorreto pode mostrar outra espécie ou um pedaço do sprite.
+
+### 3. Ajustar movimento, animação e combate
+
+- `scenes/entities/Enemy.gd`: velocidade, animação, captura, dano recebido e ataque às torres.
+- `scenes/entities/Enemy.tscn`: nós visuais, colisão e barra de vida.
+- `scripts/data/PokemonData.gd`: tamanho de frame e cálculo da região do sprite.
+- `SpriteFrameFactory.gd`: recorte/transparência dos frames, caso seja necessário ajustar a remoção de fundo.
+
+Após alterar coordenadas, execute uma onda no Godot e confira visualmente cada espécie antes de adicionar muitos inimigos ao roster.
