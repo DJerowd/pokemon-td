@@ -80,7 +80,7 @@ func update_hud_stats() -> void:
 	if lbl_wave:
 		lbl_wave.text = "Onda: " + str(GameManager.current_wave)
 	if lbl_selected_ball:
-		var ball_name := GameManager.selected_pokeball if not GameManager.selected_pokeball.is_empty() else "Sem Pokébolas"
+		var ball_name: String = str(GameManager.selected_pokeball) if not str(GameManager.selected_pokeball).is_empty() else "Sem Pokébolas"
 		lbl_selected_ball.text = "%s: %d" % [ball_name, int(GameManager.pokeball_inventory.get(ball_name, 0))]
 	if (is_instance_valid(bag_panel) and bag_panel.visible) or (is_instance_valid(balls_panel) and balls_panel.visible):
 		_rebuild_bag_list()
@@ -140,7 +140,9 @@ func _create_bag_icon() -> void:
 func _animate_bag_icon(opening: bool) -> void:
 	if bag_icon_texture == null:
 		return
-	var frames: Array[int] = [0, 68, 136] if opening else [136, 68, 0]
+	var frames: Array[int] = [0, 68, 136]
+	if not opening:
+		frames.reverse()
 	for frame_x in frames:
 		bag_icon_texture.region = Rect2(frame_x, 0, 68, 72)
 		await get_tree().create_timer(0.055, true, false, true).timeout
