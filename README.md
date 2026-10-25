@@ -135,7 +135,7 @@ A torre usa `Area2D` para saber quando corpos entram ou saem do alcance. A área
 - **MOVER** remove a torre atual da posição e ativa o modo de posicionamento para escolher outro espaço; **RETIRAR** devolve o Pokémon à barra da equipe sem removê-lo da equipe ativa.
 - A seleção de inicial inclui as nove gerações, com estatísticas base, tipos e quatro espaços de golpes. Os atributos são copiados para o recurso `PokemonData`.
 - Os sprites de iniciais das gerações 6–9 ficam sem recorte até que coordenadas confiáveis sejam cadastradas. Isso evita mostrar um Pokémon incorreto por usar offsets presumidos. A seleção exibe os atributos mesmo quando não há sprite mapeado.
-- Os inimigos mantêm orientação horizontal ao fazer curvas: em segmentos muito verticais ou com variações bruscas, conservam a última direção em vez de alternar para frames verticais de forma instável.
+- Os inimigos desativam a rotação automática do `PathFollow2D`, então a textura não gira com a tangente da curva. A direção do frame muda apenas quando o movimento horizontal está suficientemente claro; em trechos verticais, conserva a última direção.
 
 ### Testes manuais adicionais
 
