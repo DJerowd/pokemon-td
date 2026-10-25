@@ -26,6 +26,7 @@ var anim_timer: float = 0.0
 @export var anim_speed: float = 0.25
 
 var enemies_in_range: Array = []
+var invalid_sprite_warning_shown: bool = false
 @onready var attack_timer: Timer = $Timer
 @onready var range_area: Area2D = $Area2D
 @onready var click_area: Area2D = $ClickArea
@@ -99,7 +100,16 @@ func update_sprite_texture() -> void:
 			sprite.flip_h = true
 		else:
 			sprite.flip_h = false
-		atlas.region = pokemon_data.get_frame_region(row, anim_frame)
+		var requested_region: Rect2 = pokemon_data.get_frame_region(row, anim_frame)
+		var atlas_size: Vector2 = atlas.atlas.get_size() if atlas.atlas else Vector2.ZERO
+		# Nunca aplique regiões fora da imagem: alguns offsets antigos da base
+		# de iniciais pertencem a outra versão de sprite sheet.
+		if requested_region.position.x < 0.0 or requested_region.position.y < 0.0 or requested_region.end.x > atlas_size.x or requested_region.end.y > atlas_size.y:
+			if not invalid_sprite_warning_shown:
+				push_warning("Sprite fora dos limites para %s; confira sprite_origin e frame_size em PokemonData." % pokemon_data.species_name)
+				invalid_sprite_warning_shown = true
+			return
+		atlas.region = requested_region
 
 func _draw() -> void:
 	if is_selected and pokemon_data:
