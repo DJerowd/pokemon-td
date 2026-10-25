@@ -127,3 +127,20 @@ A torre usa `Area2D` para saber quando corpos entram ou saem do alcance. A área
 6. Teste os três tipos de Pokébola; Great Ball e Ultra Ball devem ter chance maior que a Poké Bola.
 7. Tente capturar um inimigo especial: a tentativa deve ser recusada sem consumir uma Pokébola.
 8. Deixe um inimigo especial atacar uma torre, depois teste Poção e o item de cura de status.
+
+
+## Correções adicionais: torres, inspetor, iniciais e curvas
+
+- O inspetor agora fica na parte inferior, sem escurecer a tela inteira, e a câmera centraliza o Pokémon selecionado.
+- **MOVER** remove a torre atual da posição e ativa o modo de posicionamento para escolher outro espaço; **RETIRAR** devolve o Pokémon à barra da equipe sem removê-lo da equipe ativa.
+- A seleção de inicial inclui as nove gerações, com estatísticas base, tipos e quatro espaços de golpes. Os atributos são copiados para o recurso `PokemonData`.
+- Os sprites de iniciais das gerações 6–9 ficam sem recorte até que coordenadas confiáveis sejam cadastradas. Isso evita mostrar um Pokémon incorreto por usar offsets presumidos. A seleção exibe os atributos mesmo quando não há sprite mapeado.
+- Os inimigos mantêm orientação horizontal ao fazer curvas: em segmentos muito verticais ou com variações bruscas, conservam a última direção em vez de alternar para frames verticais de forma instável.
+
+### Testes manuais adicionais
+
+1. Inspecione uma torre, clique em **MOVER** e clique em outro espaço livre; confirme que não existem cópias e que a barra volta a ocultar o Pokémon depois de reposicionado.
+2. Inspecione outra torre, clique em **RETIRAR** e confirme que ela reaparece na barra e que o espaço anterior fica livre.
+3. Verifique se o inspetor está na parte inferior e se a câmera foca a torre sem escurecer o campo de visão.
+4. Navegue pelas nove gerações e confirme nomes, tipos e estatísticas; sprites sem recorte cadastrado devem deixar a prévia vazia, não mostrar uma espécie errada.
+5. Observe inimigos em curvas fechadas e confirme que os sprites não ficam de cabeça para baixo nem oscilam entre direções em trechos quase verticais.
