@@ -123,7 +123,11 @@ func on_pokeball_hover(index: int) -> void:
 	var starter: Dictionary = starters[index]
 	var starter_name := str(starter.get("name", "Pokémon desconhecido"))
 	var starter_type := str(starter.get("type", "Tipo desconhecido"))
-	dialogue_label.text = "%s  •  Tipo: %s" % [starter_name, starter_type]
+	dialogue_label.text = "%s  •  Tipo: %s\nHP %d | Atq %d | Def %d | Vel %d" % [
+		starter_name, starter_type, int(starter.get("hp", 0)),
+		int(starter.get("attack", 0)), int(starter.get("defense", 0)),
+		int(starter.get("speed", 0))
+	]
 	# A prévia de sprite só aparece após clicar em uma Pokébola.
 
 func on_pokeball_clicked(index: int) -> void:
@@ -140,13 +144,26 @@ func on_pokeball_clicked(index: int) -> void:
 	waiting_for_confirmation = true
 	preview_name.text = str(starter.get("name", "Pokémon"))
 	preview_sprite.texture = _create_starter_texture(starter)
+	if preview_sprite.texture == null:
+		dialogue_label.text = "%s não tem um recorte de sprite verificado nesta spritesheet.\nTipo: %s | HP %d | Atq %d | Def %d | Vel %d" % [
+			str(starter.get("name", "Pokémon")), str(starter.get("type", "Normal")),
+			int(starter.get("hp", 0)), int(starter.get("attack", 0)),
+			int(starter.get("defense", 0)), int(starter.get("speed", 0))
+		]
 	$HoverPreviewPanel.show()
 	$HoverPreviewPanel.scale = Vector2(0.92, 0.92)
 	var preview_tween := create_tween()
 	preview_tween.set_trans(Tween.TRANS_BACK)
 	preview_tween.set_ease(Tween.EASE_OUT)
 	preview_tween.tween_property($HoverPreviewPanel, "scale", Vector2.ONE, 0.2)
-	dialogue_label.text = "Deseja escolher %s como seu Pokémon inicial?" % str(starter.get("name", "este Pokémon"))
+	if preview_sprite.texture != null:
+		dialogue_label.text = "Deseja escolher %s?\nTipo: %s • HP %d • Atq %d • Def %d • Vel %d" % [
+			str(starter.get("name", "este Pokémon")), str(starter.get("type", "Normal")),
+			int(starter.get("hp", 0)), int(starter.get("attack", 0)),
+			int(starter.get("defense", 0)), int(starter.get("speed", 0))
+		]
+	else:
+		dialogue_label.text += "\nDeseja escolher este inicial?"
 	btn_yes.text = "SIM"
 	btn_no.text = "VOLTAR"
 	choices_container.show()
