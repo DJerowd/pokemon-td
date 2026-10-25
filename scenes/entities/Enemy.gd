@@ -8,6 +8,7 @@ const SPRITE_FACTORY = preload("res://scripts/data/SpriteFrameFactory.gd")
 @export var can_be_captured: bool = true
 @export_range(0.05, 1.0, 0.05) var capture_rate: float = 0.8
 @export var reward_money: int = 25
+@export var status_inflicted: String = ""
 @export var pokemon_data: PokemonData
 
 var current_hp: float = 50.0
@@ -15,6 +16,7 @@ var removed_from_game: bool = false
 var anim_timer: float = 0.0
 var anim_frame: int = 0
 var current_direction: int = 0
+var tower_attack_timer: float = 0.0
 var sprite_sheet: Texture2D
 
 @onready var health_bar: ProgressBar = $CharacterBody2D/ProgressBar
@@ -48,6 +50,8 @@ func _process(delta: float) -> void:
 		else:
 			current_direction = 0 if direction_vector.y >= 0.0 else 1
 	anim_timer += delta
+	tower_attack_timer += delta
+	_attack_nearby_tower()
 	if anim_timer >= 0.24:
 		anim_timer = fmod(anim_timer, 0.24)
 		anim_frame = (anim_frame + 1) % 2
@@ -55,6 +59,22 @@ func _process(delta: float) -> void:
 	progress += speed * delta
 	if progress_ratio >= 1.0:
 		reach_end_of_path()
+
+func _attack_nearby_tower() -> void:
+	if tower_attack_timer < 1.25:
+		return
+	var target_tower: Node2D = null
+	var nearest_distance := 28.0
+	for candidate in get_tree().get_nodes_in_group("towers"):
+		if not is_instance_valid(candidate) or candidate.is_queued_for_deletion():
+			continue
+		var distance := global_position.distance_to(candidate.global_position)
+		if distance < nearest_distance:
+			nearest_distance = distance
+			target_tower = candidate as Node2D
+	if target_tower and target_tower.has_method("take_damage"):
+		target_tower.call("take_damage", 8.0, status_inflicted)
+		tower_attack_timer = 0.0
 
 func get_parent_curve() -> Curve2D:
 	var path := get_parent() as Path2D
