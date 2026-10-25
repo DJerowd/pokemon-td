@@ -19,6 +19,8 @@ enum Type { NORMAL, FIRE, WATER, GRASS, ELECTRIC, ICE, FIGHTING, POISON, GROUND,
 
 @export_category("Estatísticas Base")
 @export var hp: float = 45.0
+@export var current_hp: float = 0.0
+@export var status_condition: String = ""
 @export var attack: float = 49.0
 @export var special_attack: float = 65.0
 @export var defense: float = 49.0
