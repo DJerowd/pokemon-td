@@ -173,7 +173,7 @@ static func create_pokemon_data(species_name: String, level: int = 5, overrides:
 	fallback.special_defense = float(entry.get("special_defense", 49.0))
 	fallback.speed = float(entry.get("speed", 45.0))
 	fallback.primary_type = _type_from_name(str(entry.get("type", "Normal")).split("/")[0])
-	fallback.secondary_type = _type_from_name(str(entry.get("type", "Normal")).split("/")[1]) if str(entry.get("type", "").contains("/")) else PokemonData.Type.NONE
+	fallback.secondary_type = _type_from_name(str(entry.get("type", "Normal")).split("/")[1]) if str(entry.get("type", "")).contains("/") else PokemonData.Type.NONE
 	fallback.available_moves.clear()
 	for move in entry.get("moves", ["Investida", "", "", ""]):
 		fallback.available_moves.append(str(move))
