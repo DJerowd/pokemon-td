@@ -5,17 +5,21 @@ func _ready() -> void:
 
 func populate_bar() -> void:
 	for child in get_children():
+		remove_child(child)
 		child.queue_free()
-		
-	# Cria mini-cards para cada Pokémon do time ativo escolhido na seleção
+
+	# Cada botão representa um Pokémon escolhido para a batalha.
+	# Clicar seleciona a unidade; o próximo clique em um slot a posiciona.
 	for pokemon in GameManager.active_battle_team:
-		if pokemon:
-			var card = Button.new()
-			card.text = pokemon.species_name + "\nLvl " + str(pokemon.level)
-			card.custom_minimum_size = Vector2(64, 64)
-			
-			# Anexa o script de arrastar para a barra de time
-			card.set_script(load("res://scripts/ui/DraggableTeamCard.gd"))
-			card.pokemon_data = pokemon
-			
-			add_child(card)
+		if pokemon == null:
+			continue
+		var card := Button.new()
+		card.text = "%s\nNv. %d" % [pokemon.species_name, pokemon.level]
+		card.custom_minimum_size = Vector2(72, 64)
+		card.tooltip_text = "Selecione e clique em um espaço vazio do mapa."
+		card.pressed.connect(_on_pokemon_pressed.bind(pokemon))
+		add_child(card)
+
+func _on_pokemon_pressed(pokemon: PokemonData) -> void:
+	if GameManager.can_deploy_pokemon(pokemon):
+		GameManager.selected_pokemon_to_place = pokemon
