@@ -8,11 +8,44 @@ var current_wave: int = 0
 var enemies_to_spawn: int = 0
 var is_wave_active: bool = false
 var spawn_failed: bool = false
+var spawn_queue: Array[Dictionary] = []
 
 signal wave_completed
 signal wave_start_failed(message: String)
 
 var spawn_timer: Timer
+
+# Roster pré-programado: cada inimigo tem espécie, estatísticas, sprite e
+# política de captura próprios. O último membro de algumas ondas é especial.
+var wave_rosters: Array = [
+	[
+		{"name":"Bulbasaur","origin":Vector2(0, 32),"hp":40,"speed":90.0,"capturable":true,"capture_rate":0.85,"reward":25,"type":PokemonData.Type.GRASS},
+		{"name":"Charmander","origin":Vector2(256, 32),"hp":36,"speed":112.0,"capturable":true,"capture_rate":0.8,"reward":25,"type":PokemonData.Type.FIRE},
+		{"name":"Squirtle","origin":Vector2(448, 32),"hp":48,"speed":82.0,"capturable":true,"capture_rate":0.9,"reward":30,"type":PokemonData.Type.WATER},
+		{"name":"Chikorita","origin":Vector2(0, 128),"hp":55,"speed":76.0,"capturable":true,"capture_rate":0.7,"reward":35,"type":PokemonData.Type.GRASS},
+		{"name":"Rival Bulbasaur","origin":Vector2(0, 32),"hp":90,"speed":72.0,"capturable":false,"capture_rate":0.0,"reward":70,"type":PokemonData.Type.GRASS}
+	],
+	[
+		{"name":"Cyndaquil","origin":Vector2(192, 128),"hp":58,"speed":118.0,"capturable":true,"capture_rate":0.8,"reward":35,"type":PokemonData.Type.FIRE},
+		{"name":"Totodile","origin":Vector2(384, 128),"hp":72,"speed":84.0,"capturable":true,"capture_rate":0.75,"reward":40,"type":PokemonData.Type.WATER},
+		{"name":"Treecko","origin":Vector2(192, 2432),"hp":62,"speed":132.0,"capturable":true,"capture_rate":0.7,"reward":40,"type":PokemonData.Type.GRASS},
+		{"name":"Torchic","origin":Vector2(384, 2432),"hp":66,"speed":110.0,"capturable":true,"capture_rate":0.72,"reward":40,"type":PokemonData.Type.FIRE},
+		{"name":"Guardião Johto","origin":Vector2(384, 128),"hp":155,"speed":70.0,"capturable":false,"capture_rate":0.0,"reward":110,"type":PokemonData.Type.WATER}
+	],
+	[
+		{"name":"Mudkip","origin":Vector2(576, 2432),"hp":84,"speed":88.0,"capturable":true,"capture_rate":0.72,"reward":45,"type":PokemonData.Type.WATER},
+		{"name":"Turtwig","origin":Vector2(0, 3500),"hp":94,"speed":76.0,"capturable":true,"capture_rate":0.7,"reward":50,"type":PokemonData.Type.GRASS},
+		{"name":"Chimchar","origin":Vector2(192, 3500),"hp":78,"speed":126.0,"capturable":true,"capture_rate":0.68,"reward":50,"type":PokemonData.Type.FIRE},
+		{"name":"Piplup","origin":Vector2(384, 3500),"hp":90,"speed":90.0,"capturable":true,"capture_rate":0.68,"reward":50,"type":PokemonData.Type.WATER},
+		{"name":"Sentinela Sinnoh","origin":Vector2(0, 3500),"hp":230,"speed":62.0,"capturable":false,"capture_rate":0.0,"reward":160,"type":PokemonData.Type.GRASS}
+	],
+	[
+		{"name":"Snivy","origin":Vector2(0, 4800),"hp":102,"speed":140.0,"capturable":true,"capture_rate":0.65,"reward":60,"type":PokemonData.Type.GRASS},
+		{"name":"Tepig","origin":Vector2(192, 4800),"hp":118,"speed":98.0,"capturable":true,"capture_rate":0.65,"reward":60,"type":PokemonData.Type.FIRE},
+		{"name":"Oshawott","origin":Vector2(384, 4800),"hp":108,"speed":112.0,"capturable":true,"capture_rate":0.65,"reward":60,"type":PokemonData.Type.WATER},
+		{"name":"Elite Unova","origin":Vector2(384, 4800),"hp":320,"speed":68.0,"capturable":false,"capture_rate":0.0,"reward":220,"type":PokemonData.Type.WATER}
+	]
+]
 
 func _ready() -> void:
 	spawn_timer = Timer.new()
@@ -28,14 +61,22 @@ func start_next_wave() -> bool:
 		push_error("WaveManager: configure enemy_scene e path_node no Inspector.")
 		wave_start_failed.emit("Cena de inimigo ou caminho não configurado.")
 		return false
-
 	current_wave += 1
 	GameManager.current_wave = current_wave
 	GameManager.stats_changed.emit()
-	enemies_to_spawn = 3 + current_wave * 2
+	var roster_index := mini(current_wave - 1, wave_rosters.size() - 1)
+	spawn_queue.clear()
+	for entry in wave_rosters[roster_index]:
+		var profile: Dictionary = entry.duplicate(true)
+		if current_wave > wave_rosters.size():
+			var extra_scale := 1.0 + float(current_wave - wave_rosters.size()) * 0.22
+			profile["hp"] = float(profile.get("hp", 50.0)) * extra_scale
+			profile["reward"] = int(profile.get("reward", 25)) + (current_wave - wave_rosters.size()) * 10
+		spawn_queue.append(profile)
+	enemies_to_spawn = spawn_queue.size()
 	spawn_failed = false
 	is_wave_active = true
-	print("Iniciando onda ", current_wave, " (", enemies_to_spawn, " inimigos).")
+	print("Iniciando onda ", current_wave, " com roster pré-programado (", enemies_to_spawn, " Pokémon).")
 	_spawn_single_enemy()
 	if is_wave_active and enemies_to_spawn > 0:
 		spawn_timer.start()
@@ -49,30 +90,39 @@ func _spawn_single_enemy() -> void:
 	if not is_wave_active:
 		spawn_timer.stop()
 		return
-	if enemies_to_spawn <= 0:
+	if spawn_queue.is_empty():
 		spawn_timer.stop()
 		return
 	if enemy_scene == null or path_node == null:
 		_fail_wave("Dependência de spawn ausente durante a onda.")
 		return
-
 	var enemy := enemy_scene.instantiate()
 	if not (enemy is PathFollow2D):
 		enemy.free()
 		_fail_wave("A cena de inimigo precisa ter PathFollow2D como nó raiz.")
 		return
-
-	# Dados mínimos tornam HP e captura previsíveis até existir uma tabela de inimigos.
+	var profile: Dictionary = spawn_queue.pop_front()
 	var wild_data := PokemonData.new()
-	wild_data.species_name = "Pokémon selvagem"
-	wild_data.hp = 50.0 + current_wave * 5.0
-	wild_data.attack = 40.0
+	wild_data.id = absi(str(profile.get("name", "Pokémon")).hash()) % 100000
+	wild_data.species_name = str(profile.get("name", "Pokémon selvagem"))
+	wild_data.level = 3 + current_wave * 2
+	wild_data.sprite_origin = profile.get("origin", Vector2.ZERO)
+	wild_data.frame_size = Vector2(32, 32)
+	wild_data.hp = float(profile.get("hp", 50.0))
+	wild_data.current_hp = wild_data.hp
+	wild_data.attack = 8.0 + current_wave * 2.0
+	wild_data.primary_type = int(profile.get("type", PokemonData.Type.NORMAL)) as PokemonData.Type
+	wild_data.available_moves = ["Investida", "Ataque Rápido", "", ""]
 	enemy.set("pokemon_data", wild_data)
+	enemy.set("max_hp", wild_data.hp)
+	enemy.set("speed", float(profile.get("speed", 100.0)))
+	enemy.set("can_be_captured", bool(profile.get("capturable", true)))
+	enemy.set("capture_rate", float(profile.get("capture_rate", 0.75)))
+	enemy.set("reward_money", int(profile.get("reward", 25)))
 	enemy.set("progress_ratio", 0.0)
 	path_node.add_child(enemy)
-	enemies_to_spawn -= 1
-
-	if enemies_to_spawn <= 0:
+	enemies_to_spawn = spawn_queue.size()
+	if spawn_queue.is_empty():
 		spawn_timer.stop()
 
 func _fail_wave(message: String) -> void:
