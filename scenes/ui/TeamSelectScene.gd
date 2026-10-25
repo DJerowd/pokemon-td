@@ -43,9 +43,9 @@ func setup_team_slots() -> void:
 func assign_pokemon_to_slot(index: int, pokemon_data: PokemonData) -> void:
 	if index < 0 or index >= current_team_selection.size() or pokemon_data == null:
 		return
-	# Un Pokémon ne peut occuper qu'un seul emplacement à la fois.
+	# Um Pokémon pode ocupar somente um slot por vez.
 	for i in range(current_team_selection.size()):
-		if current_team_selection[i] == pokemon_data:
+		if i != index and current_team_selection[i] == pokemon_data:
 			current_team_selection[i] = null
 			var panel := team_slots_row.get_child(i)
 			panel.set("assigned_pokemon", null)
