@@ -102,26 +102,20 @@ func _spawn_single_enemy() -> void:
 		_fail_wave("A cena de inimigo precisa ter PathFollow2D como nó raiz.")
 		return
 	var profile: Dictionary = spawn_queue.pop_front()
-	var wild_data := PokemonData.new()
-	wild_data.id = absi(str(profile.get("name", "Pokémon")).hash()) % 100000
-	wild_data.species_name = str(profile.get("name", "Pokémon selvagem"))
-	wild_data.level = 3 + current_wave * 2
-	wild_data.sprite_origin = profile.get("origin", Vector2.ZERO)
-	wild_data.frame_size = Vector2(32, 32)
-	wild_data.hp = float(profile.get("hp", 50.0))
+	var species_name := str(profile.get("name", "Pokémon"))
+	var species_overrides := {
+		"hp": float(profile.get("hp", 50.0)),
+		"sprite_origin": profile.get("origin", Vector2.ZERO),
+		"display_name": species_name
+	}
+	var wild_data := StarterDatabase.create_pokemon_data(species_name, 3 + current_wave * 2, species_overrides)
+	if StarterDatabase.get_species(species_name).is_empty():
+		# Fallback for custom/boss names: use a known species' base data, but
+		# preserve the custom display name, sprite, HP and wave profile.
+		wild_data = StarterDatabase.create_pokemon_data("Bulbasaur", 3 + current_wave * 2, species_overrides)
 	wild_data.current_hp = wild_data.hp
 	wild_data.attack = 8.0 + current_wave * 2.0
-	var profile_type := int(profile.get("type", PokemonData.Type.NORMAL))
-	match profile_type:
-		PokemonData.Type.GRASS:
-			wild_data.primary_type = PokemonData.Type.GRASS
-		PokemonData.Type.FIRE:
-			wild_data.primary_type = PokemonData.Type.FIRE
-		PokemonData.Type.WATER:
-			wild_data.primary_type = PokemonData.Type.WATER
-		_:
-			wild_data.primary_type = PokemonData.Type.NORMAL
-	wild_data.available_moves = ["Investida", "Ataque Rápido", "", ""]
+
 	enemy.set("pokemon_data", wild_data)
 	enemy.set("max_hp", wild_data.hp)
 	enemy.set("speed", float(profile.get("speed", 100.0)))
