@@ -29,6 +29,9 @@ const BALL_COLUMN := {
 var bag_button: Button
 var bag_panel: PanelContainer
 var bag_list: VBoxContainer
+var balls_button: Button
+var balls_panel: PanelContainer
+var balls_list: VBoxContainer
 var menu_panel: PanelContainer
 var pending_item_name: String = ""
 var drag_preview: Control
@@ -39,7 +42,7 @@ var ball_sheet: Texture2D
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
-	mouse_filter = Control.MOUSE_FILTER_PASS
+	mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_to_group("battle_hud")
 	update_hud_stats()
 	GameManager.stats_changed.connect(update_hud_stats)
@@ -78,14 +81,14 @@ func update_hud_stats() -> void:
 	if lbl_selected_ball:
 		var ball_name := GameManager.selected_pokeball if not GameManager.selected_pokeball.is_empty() else "Sem Pokébolas"
 		lbl_selected_ball.text = "%s: %d" % [ball_name, int(GameManager.pokeball_inventory.get(ball_name, 0))]
-	if is_instance_valid(bag_panel) and bag_panel.visible:
+	if (is_instance_valid(bag_panel) and bag_panel.visible) or (is_instance_valid(balls_panel) and balls_panel.visible):
 		_rebuild_bag_list()
 
 func _create_bag_button() -> void:
 	bag_button = Button.new()
-	bag_button.name = "BagButton"
-	bag_button.tooltip_text = "Abrir bolsa de itens e Pokébolas"
-	bag_button.text = "BOLSA"
+	bag_button.name = "ItemsBagButton"
+	bag_button.tooltip_text = "Abrir bolsa de itens"
+	bag_button.text = "ITENS"
 	bag_button.custom_minimum_size = Vector2(82, 72)
 	bag_button.anchor_left = 1.0
 	bag_button.anchor_top = 1.0
@@ -95,8 +98,28 @@ func _create_bag_button() -> void:
 	bag_button.offset_top = -88.0
 	bag_button.offset_right = -18.0
 	bag_button.offset_bottom = -16.0
+	bag_button.z_index = 30
+	bag_button.mouse_filter = Control.MOUSE_FILTER_STOP
 	bag_button.pressed.connect(_toggle_bag)
 	add_child(bag_button)
+
+	balls_button = Button.new()
+	balls_button.name = "PokeballsBagButton"
+	balls_button.tooltip_text = "Abrir bolsa de Pokébolas"
+	balls_button.text = "BOLAS"
+	balls_button.custom_minimum_size = Vector2(82, 72)
+	balls_button.anchor_left = 1.0
+	balls_button.anchor_top = 1.0
+	balls_button.anchor_right = 1.0
+	balls_button.anchor_bottom = 1.0
+	balls_button.offset_left = -190.0
+	balls_button.offset_top = -88.0
+	balls_button.offset_right = -108.0
+	balls_button.offset_bottom = -16.0
+	balls_button.z_index = 30
+	balls_button.mouse_filter = Control.MOUSE_FILTER_STOP
+	balls_button.pressed.connect(_toggle_balls_bag)
+	add_child(balls_button)
 
 func _create_bag_icon() -> void:
 	if bag_sheet == null or bag_button == null:
@@ -117,68 +140,87 @@ func _animate_bag_icon(opening: bool) -> void:
 		await get_tree().create_timer(0.055, true, false, true).timeout
 
 func _create_bag_panel() -> void:
-	bag_panel = PanelContainer.new()
-	bag_panel.name = "BagPanel"
-	bag_panel.visible = false
-	bag_panel.custom_minimum_size = Vector2(300, 340)
-	bag_panel.anchor_left = 1.0
-	bag_panel.anchor_top = 1.0
-	bag_panel.anchor_right = 1.0
-	bag_panel.anchor_bottom = 1.0
-	bag_panel.offset_left = -330.0
-	bag_panel.offset_top = -450.0
-	bag_panel.offset_right = -18.0
-	bag_panel.offset_bottom = -100.0
-	bag_panel.add_theme_stylebox_override("panel", _make_panel_style(Color(0.055, 0.12, 0.24, 0.98), Color(0.25, 0.78, 0.96)))
+	bag_panel = _make_inventory_panel("ItemsBagPanel", Vector2(-330, -450), Vector2(-18, -100))
+	bag_list = _add_inventory_list(bag_panel)
+	balls_panel = _make_inventory_panel("PokeballsBagPanel", Vector2(-420, -450), Vector2(-108, -100))
+	balls_list = _add_inventory_list(balls_panel)
+	_rebuild_bag_list()
+
+func _make_inventory_panel(panel_name: String, top_left_offset: Vector2, bottom_right_offset: Vector2) -> PanelContainer:
+	var panel := PanelContainer.new()
+	panel.name = panel_name
+	panel.visible = false
+	panel.custom_minimum_size = Vector2(300, 340)
+	panel.anchor_left = 1.0
+	panel.anchor_top = 1.0
+	panel.anchor_right = 1.0
+	panel.anchor_bottom = 1.0
+	panel.offset_left = top_left_offset.x
+	panel.offset_top = top_left_offset.y
+	panel.offset_right = bottom_right_offset.x
+	panel.offset_bottom = bottom_right_offset.y
+	panel.z_index = 25
+	panel.mouse_filter = Control.MOUSE_FILTER_STOP
+	panel.add_theme_stylebox_override("panel", _make_panel_style(Color(0.055, 0.12, 0.24, 0.98), Color(0.25, 0.78, 0.96)))
 	var margin := MarginContainer.new()
 	margin.add_theme_constant_override("margin_left", 10)
 	margin.add_theme_constant_override("margin_right", 10)
 	margin.add_theme_constant_override("margin_top", 8)
 	margin.add_theme_constant_override("margin_bottom", 8)
-	bag_panel.add_child(margin)
+	panel.add_child(margin)
 	var scroll := ScrollContainer.new()
+	scroll.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	margin.add_child(scroll)
-	bag_list = VBoxContainer.new()
-	bag_list.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	bag_list.add_theme_constant_override("separation", 6)
-	scroll.add_child(bag_list)
-	add_child(bag_panel)
-	_rebuild_bag_list()
+	var list := VBoxContainer.new()
+	list.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	list.add_theme_constant_override("separation", 6)
+	scroll.add_child(list)
+	add_child(panel)
+	return panel
+
+func _add_inventory_list(panel: PanelContainer) -> VBoxContainer:
+	var margin := panel.get_child(0) as MarginContainer
+	var scroll := margin.get_child(0) as ScrollContainer
+	return scroll.get_child(0) as VBoxContainer
 
 func _rebuild_bag_list() -> void:
-	if bag_list == null:
+	if bag_list == null or balls_list == null:
 		return
 	for child in bag_list.get_children():
 		child.queue_free()
-	_add_section_title("ITENS")
+	for child in balls_list.get_children():
+		child.queue_free()
+	_add_section_title_to(bag_list, "ITENS")
 	for item_name in ["Poção", "Antídoto", "Despertar"]:
-		_add_inventory_entry(str(item_name), int(GameManager.inventory_items.get(item_name, 0)), "item")
-	_add_section_title("POKÉ BOLAS")
+		_add_inventory_entry_to(bag_list, str(item_name), int(GameManager.inventory_items.get(item_name, 0)), "item")
+	_add_section_title_to(balls_list, "POKÉ BOLAS")
 	for ball_name in ["Poké Bola", "Great Ball", "Ultra Ball"]:
-		_add_inventory_entry(str(ball_name), int(GameManager.pokeball_inventory.get(ball_name, 0)), "ball")
+		_add_inventory_entry_to(balls_list, str(ball_name), int(GameManager.pokeball_inventory.get(ball_name, 0)), "ball")
 
-func _add_section_title(title: String) -> void:
+func _add_section_title_to(target_list: VBoxContainer, title: String) -> void:
 	var label := Label.new()
 	label.text = title
 	label.add_theme_color_override("font_color", Color(0.48, 0.88, 1.0))
 	label.add_theme_font_size_override("font_size", 15)
-	bag_list.add_child(label)
+	target_list.add_child(label)
 
-func _add_inventory_entry(entry_name: String, count: int, kind: String) -> void:
+func _add_inventory_entry_to(target_list: VBoxContainer, entry_name: String, count: int, kind: String) -> void:
 	var button := Button.new()
 	button.set_script(ITEM_BUTTON_SCRIPT)
 	button.set("item_name", entry_name)
 	button.set("inventory_kind", kind)
 	button.text = "%s    × %d" % [entry_name, count]
-	button.custom_minimum_size = Vector2(260, 38)
+	button.custom_minimum_size = Vector2(260, 42)
+	button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	button.disabled = count <= 0
+	button.mouse_filter = Control.MOUSE_FILTER_STOP
 	var icon_texture := _get_inventory_icon(entry_name, kind)
 	if icon_texture:
 		button.icon = icon_texture
 		button.icon_alignment = HORIZONTAL_ALIGNMENT_LEFT
 	button.pressed.connect(_on_inventory_entry_pressed.bind(entry_name, kind))
-	bag_list.add_child(button)
+	target_list.add_child(button)
 
 func _get_inventory_icon(entry_name: String, kind: String) -> Texture2D:
 	if kind == "ball":
@@ -278,7 +320,9 @@ func _input(event: InputEvent) -> void:
 		if bag_panel.visible and not bag_panel.get_global_rect().has_point(event.position) and not bag_button.get_global_rect().has_point(event.position):
 			_animate_bag_icon(false)
 			bag_panel.hide()
-		if pending_item_name != "" and not bag_panel.get_global_rect().has_point(event.position) and not bag_button.get_global_rect().has_point(event.position):
+		if balls_panel.visible and not balls_panel.get_global_rect().has_point(event.position) and not balls_button.get_global_rect().has_point(event.position):
+			balls_panel.hide()
+		if pending_item_name != "" and not bag_panel.get_global_rect().has_point(event.position) and not bag_button.get_global_rect().has_point(event.position) and not balls_panel.get_global_rect().has_point(event.position) and not balls_button.get_global_rect().has_point(event.position):
 			var target := _find_tower_at_screen_position(event.position)
 			if target:
 				_apply_item_to_tower(pending_item_name, target)
@@ -290,11 +334,24 @@ func _toggle_bag() -> void:
 		_animate_bag_icon(false)
 		bag_panel.hide()
 	else:
+		balls_panel.hide()
 		_rebuild_bag_list()
 		bag_panel.show()
+		bag_panel.move_to_front()
 		_animate_bag_icon(true)
 		if menu_panel.visible:
-			menu_panel.hide()
+			_close_menu()
+
+func _toggle_balls_bag() -> void:
+	if balls_panel.visible:
+		balls_panel.hide()
+	else:
+		bag_panel.hide()
+		_rebuild_bag_list()
+		balls_panel.show()
+		balls_panel.move_to_front()
+		if menu_panel.visible:
+			_close_menu()
 
 func _on_inventory_entry_pressed(entry_name: String, kind: String) -> void:
 	if kind == "ball":
@@ -309,8 +366,11 @@ func _on_inventory_entry_pressed(entry_name: String, kind: String) -> void:
 		pending_item_name = entry_name
 		drag_preview.text = "↘ " + entry_name
 		drag_preview.visible = true
-	_animate_bag_icon(false)
-	bag_panel.hide()
+	if kind == "item":
+		_animate_bag_icon(false)
+		bag_panel.hide()
+	else:
+		balls_panel.hide()
 	update_hud_stats()
 
 func _toggle_menu() -> void:
@@ -318,7 +378,9 @@ func _toggle_menu() -> void:
 		_close_menu()
 	else:
 		menu_panel.show()
+		menu_panel.move_to_front()
 		bag_panel.hide()
+		balls_panel.hide()
 		get_tree().paused = true
 
 func _close_menu() -> void:
@@ -343,7 +405,7 @@ func _give_up() -> void:
 func play_capture_animation(target: Node2D, ball_name: String, was_captured: bool) -> void:
 	if not is_instance_valid(target):
 		return
-	var start := bag_button.get_global_rect().get_center()
+	var start := (balls_button if is_instance_valid(balls_button) else bag_button).get_global_rect().get_center()
 	var target_world := target.global_position
 	var camera := get_viewport().get_camera_2d()
 	var target_screen: Vector2 = get_viewport().get_canvas_transform() * target_world
