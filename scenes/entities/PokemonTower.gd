@@ -33,8 +33,8 @@ var invalid_sprite_warning_shown: bool = false
 @onready var sprite: Sprite2D = $Sprite2D
 
 func _ready() -> void:
-	# Use the sprite resource assigned in PokemonData. Do not load a hard-coded
-	# file path: a missing optional sprite should not break combat logic.
+	# Usa a textura atribuída em PokemonData. Não carregue um caminho fixo:
+	# a ausência de um sprite opcional não deve interromper o combate.
 	if sprite and pokemon_data and pokemon_data.sprite:
 		sprite.texture = pokemon_data.sprite
 	_apply_stats()
@@ -89,7 +89,7 @@ func set_direction(new_direction: Direction) -> void:
 func update_sprite_texture() -> void:
 	if not pokemon_data or not sprite:
 		return
-	# Atlas cropping is only possible when a texture and frame coordinates exist.
+	# O recorte por atlas só é possível quando há textura e coordenadas válidas.
 	if pokemon_data.sprite != null and sprite.texture != pokemon_data.sprite:
 		sprite.texture = pokemon_data.sprite
 	if sprite.texture is AtlasTexture:
@@ -118,7 +118,7 @@ func _draw() -> void:
 		draw_arc(Vector2.ZERO, radius, 0.0, TAU, 64, Color(0.102, 0.902, 1.0, 0.8), 2.0)
 
 func _on_enemy_entered(body: Node2D) -> void:
-	# The Area2D usually detects the enemy's CharacterBody2D child.
+	# A Area2D normalmente detecta o CharacterBody2D filho do inimigo.
 	var enemy := body.get_parent() as Node2D
 	if enemy and enemy.is_in_group("enemies") and not enemies_in_range.has(enemy):
 		enemies_in_range.append(enemy)
@@ -151,7 +151,7 @@ func open_tower_inspector() -> void:
 	if inspector_scene == null:
 		push_warning("Cena TowerInspectorMenu.tscn não encontrada.")
 		return
-	# Prevent opening several inspectors for one tower.
+	# Evita abrir vários inspetores para a mesma torre.
 	for child in get_tree().current_scene.get_children():
 		if child is Control and child.get_script() == load("res://scenes/ui/TowerInspectorMenu.gd"):
 			if child.get("target_tower") == self:
