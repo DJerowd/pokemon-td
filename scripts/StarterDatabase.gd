@@ -30,9 +30,9 @@ static var generations = [
 	{
 		"region": "Sinnoh (Geração 4)",
 		"starters": [
-			{ "name": "Turtwig", "type": "Planta", "sprite_origin": Vector2(0, 3500), "hp": 55, "attack": 68 },
-			{ "name": "Chimchar", "type": "Fogo", "sprite_origin": Vector2(192, 3500), "hp": 44, "attack": 58 },
-			{ "name": "Piplup", "type": "Água", "sprite_origin": Vector2(384, 3500), "hp": 53, "attack": 51 }
+			{ "name": "Turtwig", "type": "Planta", "sprite_origin": Vector2(0, 3488), "hp": 55, "attack": 68 },
+			{ "name": "Chimchar", "type": "Fogo", "sprite_origin": Vector2(192, 3488), "hp": 44, "attack": 58 },
+			{ "name": "Piplup", "type": "Água", "sprite_origin": Vector2(384, 3488), "hp": 53, "attack": 51 }
 		]
 	},
 	{
