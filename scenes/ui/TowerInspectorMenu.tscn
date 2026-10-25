@@ -37,17 +37,17 @@ layout_mode = 2
 layout_mode = 2
 text = "nome"
 
-[node name="LblStats" type="Label" parent="VBoxContainer" unique_id=1978966960]
+[node name="LblStats" type="Label" parent="InspectorPanel/VBoxContainer" unique_id=1978966960]
 layout_mode = 2
 text = "HP, Ataque, Defesa"
 
-[node name="LblItem" type="Label" parent="VBoxContainer" unique_id=188055571]
+[node name="LblItem" type="Label" parent="InspectorPanel/VBoxContainer" unique_id=188055571]
 layout_mode = 2
 text = "item"
 
-[node name="MovesBox" type="HBoxContainer" parent="VBoxContainer" unique_id=602845849]
+[node name="MovesBox" type="HBoxContainer" parent="InspectorPanel/VBoxContainer" unique_id=602845849]
 layout_mode = 2
 
-[node name="BtnClose" type="Button" parent="VBoxContainer" unique_id=445329781]
+[node name="BtnClose" type="Button" parent="InspectorPanel/VBoxContainer" unique_id=445329781]
 layout_mode = 2
 text = "Fechar"
