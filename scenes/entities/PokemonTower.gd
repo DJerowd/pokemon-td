@@ -146,7 +146,7 @@ func open_tower_inspector() -> void:
 		if child is Control and child.get_script() == load("res://scenes/ui/TowerInspectorMenu.gd"):
 			if child.get("target_tower") == self:
 				child.queue_free()
-	var menu := inspector_scene.instantiate()
+	var menu = inspector_scene.instantiate()
 	menu.target_pokemon = pokemon_data
 	menu.target_tower = self
 	get_tree().current_scene.add_child(menu)
