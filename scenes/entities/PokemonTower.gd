@@ -89,9 +89,7 @@ func update_sprite_texture() -> void:
 	if not pokemon_data or not sprite:
 		return
 	# Atlas cropping is only possible when a texture and frame coordinates exist.
-	if pokemon_data.sprite == null:
-		return
-	if sprite.texture != pokemon_data.sprite:
+	if pokemon_data.sprite != null and sprite.texture != pokemon_data.sprite:
 		sprite.texture = pokemon_data.sprite
 	if sprite.texture is AtlasTexture:
 		var atlas := sprite.texture as AtlasTexture
