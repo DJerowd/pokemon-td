@@ -7,7 +7,7 @@ var target_tower: Node2D = null
 @onready var lbl_title: Label = $VBoxContainer/LblTitle
 @onready var lbl_stats: Label = $VBoxContainer/LblStats
 @onready var lbl_item: Label = $VBoxContainer/LblItem
-@onready var moves_box: VBoxContainer = $VBoxContainer/MovesBox
+@onready var moves_box: HBoxContainer = $VBoxContainer/MovesBox
 @onready var btn_close: Button = $VBoxContainer/BtnClose
 
 func _ready() -> void:
