@@ -41,6 +41,10 @@ func start_next_wave() -> bool:
 	return true
 
 func _spawn_single_enemy() -> void:
+	if GameManager.game_over:
+		spawn_timer.stop()
+		is_wave_active = false
+		return
 	if not is_wave_active:
 		spawn_timer.stop()
 		return
@@ -62,9 +66,9 @@ func _spawn_single_enemy() -> void:
 	wild_data.species_name = "Pokémon selvagem"
 	wild_data.hp = 50.0 + current_wave * 5.0
 	wild_data.attack = 40.0
-	enemy.pokemon_data = wild_data
+	enemy.set("pokemon_data", wild_data)
+	enemy.set("progress_ratio", 0.0)
 	path_node.add_child(enemy)
-	enemy.progress_ratio = 0.0
 	enemies_to_spawn -= 1
 
 	if enemies_to_spawn <= 0:
