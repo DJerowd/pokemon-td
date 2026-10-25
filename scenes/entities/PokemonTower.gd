@@ -25,7 +25,7 @@ var anim_frame: int = 0
 var anim_timer: float = 0.0
 @export var anim_speed: float = 0.25
 
-var enemies_in_range: Array[Node2D] = []
+var enemies_in_range: Array = []
 @onready var attack_timer: Timer = $Timer
 @onready var range_area: Area2D = $Area2D
 @onready var click_area: Area2D = $ClickArea
@@ -68,7 +68,7 @@ func _process(delta: float) -> void:
 	enemies_in_range = enemies_in_range.filter(func(enemy): return is_instance_valid(enemy) and not enemy.is_queued_for_deletion())
 	if enemies_in_range.is_empty():
 		return
-	var target := enemies_in_range[0]
+	var target := enemies_in_range[0] as Node2D
 	var direction_vector: Vector2 = target.global_position - global_position
 	if absf(direction_vector.x) > absf(direction_vector.y):
 		set_direction(Direction.LEFT if direction_vector.x < 0.0 else Direction.RIGHT)
