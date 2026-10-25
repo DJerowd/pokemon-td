@@ -1,64 +1,55 @@
 extends Control
 
-var target_pokemon: Resource = null # Recebe o PokemonData da torre clicada
-var target_tower: Node2D = null # Referência à torre que abriu o menu
+var target_pokemon: PokemonData = null
+var target_tower: Node2D = null
 
-@onready var panel_container = $VBoxContainer # Painel ou container principal do menu
-@onready var lbl_title = $VBoxContainer/LblTitle
-@onready var lbl_stats = $VBoxContainer/LblStats
-@onready var lbl_item = $VBoxContainer/LblItem
-@onready var moves_box = $VBoxContainer/MovesBox
-@onready var btn_close = $VBoxContainer/BtnClose
+@onready var panel_container: Control = $VBoxContainer
+@onready var lbl_title: Label = $VBoxContainer/LblTitle
+@onready var lbl_stats: Label = $VBoxContainer/LblStats
+@onready var lbl_item: Label = $VBoxContainer/LblItem
+@onready var moves_box: VBoxContainer = $VBoxContainer/MovesBox
+@onready var btn_close: Button = $VBoxContainer/BtnClose
 
 func _ready() -> void:
+	btn_close.pressed.connect(_close_menu)
 	if target_pokemon:
 		update_ui()
-	
-	btn_close.pressed.connect(func(): queue_free())
 
 func _close_menu() -> void:
-	# Oculta a área de alcance da torre associada antes de fechar
+	# Toda forma de fechar deve executar a mesma limpeza.
 	if target_tower and is_instance_valid(target_tower):
-		target_tower.is_selected = false
+		target_tower.set("is_selected", false)
 		target_tower.queue_redraw()
-	
 	queue_free()
 
-# Detecta cliques fora do painel principal para fechar o menu automaticamente
 func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
-		if panel_container:
-			# Verifica se a posição global do mouse está fora da área ocupada pelo menu
-			var global_rect = panel_container.get_global_rect()
-			if not global_rect.has_point(get_global_mouse_position()):
-				_close_menu()
-				get_viewport().set_input_as_handled()
+		if panel_container and not panel_container.get_global_rect().has_point(get_global_mouse_position()):
+			_close_menu()
+			get_viewport().set_input_as_handled()
 
 func update_ui() -> void:
-	# 1. Atualiza títulos e estatísticas
-	lbl_title.text = target_pokemon.species_name + " (Lvl " + str(target_pokemon.level) + ")"
-	lbl_stats.text = "Atk: " + str(target_pokemon.attack) + " | Def: " + str(target_pokemon.defense) + " | Spd: " + str(target_pokemon.speed)
-	lbl_item.text = "Item Segurado: " + (target_pokemon.held_item if target_pokemon.held_item != "" else "Nenhum")
-	
-	# 2. Limpa e cria botões interativos para os golpes disponíveis
+	if target_pokemon == null:
+		return
+	lbl_title.text = "%s (Nv. %d)" % [target_pokemon.species_name, target_pokemon.level]
+	lbl_stats.text = "Ataque: %.1f | Defesa: %.1f | Velocidade: %.1f" % [target_pokemon.attack, target_pokemon.defense, target_pokemon.speed]
+	lbl_item.text = "Item: " + (target_pokemon.held_item if not target_pokemon.held_item.is_empty() else "Nenhum")
+
 	for child in moves_box.get_children():
+		moves_box.remove_child(child)
 		child.queue_free()
-		
-	for i in range(target_pokemon.available_moves.size()):
-		var move_name = target_pokemon.available_moves[i]
-		if move_name != "":
-			var move_btn = Button.new()
-			move_btn.text = move_name
-			
-			# Destaca visualmente qual é o golpe ativo atualmente
-			if i == target_pokemon.active_move_index:
-				move_btn.modulate = Color.GREEN_YELLOW
-				
-			# Ao clicar, muda o golpe ativo do Pokémon em tempo real
-			move_btn.pressed.connect(func():
-				target_pokemon.active_move_index = i
-				print("Golpe ativo alterado para: ", move_name)
-				update_ui() # Atualiza o destaque visual
-			)
-			
-			moves_box.add_child(move_btn)
+	for index in range(target_pokemon.available_moves.size()):
+		var move_name: String = target_pokemon.available_moves[index]
+		if move_name.is_empty():
+			continue
+		var move_button := Button.new()
+		move_button.text = ("✓ " if index == target_pokemon.active_move_index else "") + move_name
+		move_button.pressed.connect(_on_move_selected.bind(index))
+		moves_box.add_child(move_button)
+
+func _on_move_selected(index: int) -> void:
+	if target_pokemon == null:
+		return
+	target_pokemon.active_move_index = index
+	# PokemonTower consulta o golpe ativo nos dados a cada ataque.
+	update_ui()
