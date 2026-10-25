@@ -1,5 +1,8 @@
 extends Control
 
+const SPRITE_SHEET_PATH := "res://assets/textures/DS _ DSi - Pokemon Black 2 _ White 2 - Overworld - Pokemon (Overworld).png"
+const SPRITE_FRAME_SIZE := Vector2(32, 32)
+
 @onready var title_label: Label = $TitleLabel
 @onready var pokeball_buttons: Array[TextureButton] = [%Pokeball1, %Pokeball2, %Pokeball3]
 @onready var dialogue_label: Label = $DialogueBox/DialogueLabel
@@ -14,9 +17,15 @@ extends Control
 var current_gen_index: int = 0
 var selected_pokemon_info: Dictionary = {}
 var waiting_for_confirmation: bool = false
+var sprite_sheet: Texture2D
+var starter_sprite_previews: Array[TextureRect] = []
+var starter_name_labels: Array[Label] = []
 
 func _ready() -> void:
+	sprite_sheet = load(SPRITE_SHEET_PATH) as Texture2D
+	_build_starter_preview_row()
 	choices_container.hide()
+	_style_screen()
 	btn_left.pressed.connect(_on_previous_generation)
 	btn_right.pressed.connect(_on_next_generation)
 	btn_yes.pressed.connect(_on_yes_pressed)
@@ -24,17 +33,131 @@ func _ready() -> void:
 	for index in range(pokeball_buttons.size()):
 		var button := pokeball_buttons[index]
 		button.mouse_entered.connect(on_pokeball_hover.bind(index))
+		button.mouse_entered.connect(_animate_starter.bind(index, true))
+		button.mouse_exited.connect(_animate_starter.bind(index, false))
 		button.pressed.connect(on_pokeball_clicked.bind(index))
 	update_ui()
 
+func _build_starter_preview_row() -> void:
+	var layout := get_node_or_null("VBoxContainer") as VBoxContainer
+	if layout == null:
+		return
+	var row := HBoxContainer.new()
+	row.name = "StarterPreviewRow"
+	row.alignment = BoxContainer.ALIGNMENT_CENTER
+	row.add_theme_constant_override("separation", 28)
+	row.custom_minimum_size = Vector2(420, 142)
+	row.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	layout.add_child(row)
+	layout.move_child(row, 0)
+	for index in range(3):
+		var card := VBoxContainer.new()
+		card.name = "StarterPreviewCard%d" % index
+		card.alignment = BoxContainer.ALIGNMENT_CENTER
+		card.custom_minimum_size = Vector2(112, 132)
+		card.add_theme_constant_override("separation", 2)
+		var sprite_view := TextureRect.new()
+		sprite_view.name = "Sprite"
+		sprite_view.custom_minimum_size = Vector2(96, 96)
+		sprite_view.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		sprite_view.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+		sprite_view.pivot_offset = Vector2(48, 48)
+		sprite_view.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		var name_label := Label.new()
+		name_label.name = "SpeciesName"
+		name_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		name_label.add_theme_color_override("font_color", Color(0.86, 0.96, 1.0))
+		name_label.add_theme_font_size_override("font_size", 14)
+		card.add_child(sprite_view)
+		card.add_child(name_label)
+		row.add_child(card)
+		starter_sprite_previews.append(sprite_view)
+		starter_name_labels.append(name_label)
+
+func _style_screen() -> void:
+	title_label.add_theme_color_override("font_color", Color(0.78, 0.94, 1.0))
+	title_label.add_theme_font_size_override("font_size", 26)
+	preview_name.add_theme_color_override("font_color", Color(0.35, 0.88, 1.0))
+	preview_name.add_theme_font_size_override("font_size", 20)
+	preview_sprite.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	preview_sprite.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	preview_sprite.custom_minimum_size = Vector2(96, 96)
+	preview_sprite.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var panel_style := StyleBoxFlat.new()
+	panel_style.bg_color = Color(0.035, 0.09, 0.18, 0.94)
+	panel_style.border_color = Color(0.15, 0.78, 1.0, 0.95)
+	panel_style.set_border_width_all(2)
+	panel_style.set_corner_radius_all(10)
+	panel_style.content_margin_left = 12.0
+	panel_style.content_margin_right = 12.0
+	panel_style.content_margin_top = 8.0
+	panel_style.content_margin_bottom = 8.0
+	$HoverPreviewPanel.add_theme_stylebox_override("panel", panel_style)
+	$HoverPreviewPanel.custom_minimum_size = Vector2(148, 132)
+	$HoverPreviewPanel.position = Vector2(22, 58)
+	dialogue_label.add_theme_color_override("font_color", Color(0.92, 0.97, 1.0))
+	dialogue_label.add_theme_font_size_override("font_size", 18)
+	for button in [btn_left, btn_right, btn_yes, btn_no]:
+		button.add_theme_color_override("font_color", Color(0.9, 0.97, 1.0))
+		var normal := StyleBoxFlat.new()
+		normal.bg_color = Color(0.04, 0.19, 0.32, 0.96)
+		normal.border_color = Color(0.16, 0.72, 1.0)
+		normal.set_border_width_all(2)
+		normal.set_corner_radius_all(6)
+		button.add_theme_stylebox_override("normal", normal)
+		var hover := normal.duplicate() as StyleBoxFlat
+		hover.bg_color = Color(0.08, 0.35, 0.52, 1.0)
+		hover.border_color = Color(0.5, 0.95, 1.0)
+		button.add_theme_stylebox_override("hover", hover)
+		button.add_theme_stylebox_override("pressed", hover)
+
 func update_ui() -> void:
+	if StarterDatabase.generations.is_empty():
+		title_label.text = "Nenhum inicial disponível"
+		return
 	var generation: Dictionary = StarterDatabase.generations[current_gen_index]
-	title_label.text = "--- %s ---" % str(generation.get("region", "Região desconhecida"))
+	title_label.text = "ESCOLHA SEU INICIAL  •  %s" % str(generation.get("region", "Região desconhecida"))
 	if not waiting_for_confirmation:
 		choices_container.hide()
-		dialogue_label.text = "Escolha um Pokémon contido na Pokébola."
-	preview_name.text = ""
-	preview_sprite.texture = null
+		dialogue_label.text = "Escolha uma Pokébola para conhecer seu parceiro."
+	_refresh_starter_sprites(generation)
+
+func _refresh_starter_sprites(generation: Dictionary) -> void:
+	var starters: Array = generation.get("starters", [])
+	for index in range(starter_sprite_previews.size()):
+		var starter_view := starter_sprite_previews[index]
+		if index >= starters.size() or not starters[index] is Dictionary:
+			starter_view.texture = null
+			starter_name_labels[index].text = ""
+			continue
+		var starter: Dictionary = starters[index]
+		starter_view.texture = _create_starter_texture(starter)
+		starter_name_labels[index].text = str(starter.get("name", "Pokémon"))
+		starter_view.modulate = Color.WHITE
+
+func _create_starter_texture(starter: Dictionary) -> Texture2D:
+	if sprite_sheet == null:
+		return null
+	var origin: Vector2 = starter.get("sprite_origin", Vector2.ZERO)
+	var rect := Rect2(origin, SPRITE_FRAME_SIZE)
+	var bounds := Rect2(Vector2.ZERO, sprite_sheet.get_size())
+	if origin.x < 0.0 or origin.y < 0.0 or not bounds.encloses(rect):
+		return null
+	var atlas := AtlasTexture.new()
+	atlas.atlas = sprite_sheet
+	atlas.region = rect
+	return atlas
+
+func _animate_starter(index: int, hovered: bool) -> void:
+	if index < 0 or index >= starter_sprite_previews.size():
+		return
+	var sprite_view := starter_sprite_previews[index]
+	var tween := create_tween()
+	tween.set_trans(Tween.TRANS_BACK)
+	tween.set_ease(Tween.EASE_OUT)
+	tween.tween_property(sprite_view, "scale", Vector2(1.18, 1.18) if hovered else Vector2.ONE, 0.18)
+	if hovered:
+		sprite_view.modulate = Color(1.0, 1.0, 1.0, 1.0)
 
 func _on_previous_generation() -> void:
 	change_generation(-1)
@@ -43,7 +166,7 @@ func _on_next_generation() -> void:
 	change_generation(1)
 
 func change_generation(direction: int) -> void:
-	if waiting_for_confirmation:
+	if waiting_for_confirmation or StarterDatabase.generations.is_empty():
 		return
 	current_gen_index = posmod(current_gen_index + direction, StarterDatabase.generations.size())
 	update_ui()
@@ -51,57 +174,54 @@ func change_generation(direction: int) -> void:
 func on_pokeball_hover(index: int) -> void:
 	if waiting_for_confirmation:
 		return
-	var generation: Dictionary = StarterDatabase.generations[current_gen_index]
-	var starters: Array = generation.get("starters", [])
-	if index < 0 or index >= starters.size():
+	var starters: Array = StarterDatabase.generations[current_gen_index].get("starters", [])
+	if index < 0 or index >= starters.size() or not starters[index] is Dictionary:
 		return
-	var starter: Variant = starters[index]
-	if not starter is Dictionary:
-		push_warning("Dados inválidos para o Pokémon inicial no índice %d." % index)
-		return
-	var starter_name: String = str(starter.get("name", "Pokémon desconhecido"))
-	var starter_type: String = str(starter.get("type", "Tipo desconhecido"))
-	dialogue_label.text = "Contém %s (%s)." % [starter_name, starter_type]
+	var starter: Dictionary = starters[index]
+	var starter_name := str(starter.get("name", "Pokémon desconhecido"))
+	var starter_type := str(starter.get("type", "Tipo desconhecido"))
+	dialogue_label.text = "%s  •  Tipo: %s" % [starter_name, starter_type]
 	preview_name.text = starter_name
-	# O banco guarda a coordenada do sprite, não a imagem. Até uma textura
-	# válida ser configurada no recurso, o preview permanece sem textura.
+	preview_sprite.texture = _create_starter_texture(starter)
+	var tween := create_tween()
+	tween.tween_property($HoverPreviewPanel, "scale", Vector2(1.04, 1.04), 0.12)
 
 func on_pokeball_clicked(index: int) -> void:
 	if waiting_for_confirmation:
 		return
-	var generation: Dictionary = StarterDatabase.generations[current_gen_index]
-	var starters: Array = generation.get("starters", [])
-	if index < 0 or index >= starters.size():
+	var starters: Array = StarterDatabase.generations[current_gen_index].get("starters", [])
+	if index < 0 or index >= starters.size() or not starters[index] is Dictionary:
 		return
-	var starter: Variant = starters[index]
-	if not starter is Dictionary or not starter.has("name"):
+	var starter: Dictionary = starters[index]
+	if not starter.has("name"):
 		push_warning("Não foi possível selecionar o Pokémon: dados incompletos.")
 		return
 	selected_pokemon_info = starter
 	waiting_for_confirmation = true
-	dialogue_label.text = "Deseja escolher %s?" % str(selected_pokemon_info.get("name", "este Pokémon"))
+	dialogue_label.text = "Deseja escolher %s como seu Pokémon inicial?" % str(starter.get("name", "este Pokémon"))
+	btn_yes.text = "SIM"
+	btn_no.text = "VOLTAR"
 	choices_container.show()
 
 func _on_yes_pressed() -> void:
 	if selected_pokemon_info.is_empty():
 		return
 	var starter_data := PokemonData.new()
-	starter_data.id = _species_id(selected_pokemon_info["name"])
-	starter_data.species_name = selected_pokemon_info["name"]
+	starter_data.id = _species_id(str(selected_pokemon_info.get("name", "Pokémon")))
+	starter_data.species_name = str(selected_pokemon_info.get("name", "Pokémon"))
 	starter_data.level = 5
 	starter_data.sprite_origin = selected_pokemon_info.get("sprite_origin", Vector2.ZERO)
+	starter_data.sprite = _create_starter_texture(selected_pokemon_info)
 	starter_data.hp = float(selected_pokemon_info.get("hp", 45))
 	starter_data.attack = float(selected_pokemon_info.get("attack", 49))
-	var type_name: String = str(selected_pokemon_info.get("type", ""))
+	var type_name := str(selected_pokemon_info.get("type", ""))
 	if type_name.contains("Fogo"):
 		starter_data.primary_type = PokemonData.Type.FIRE
 	elif type_name.contains("Água"):
 		starter_data.primary_type = PokemonData.Type.WATER
 	else:
 		starter_data.primary_type = PokemonData.Type.GRASS
-	starter_data.secondary_type = PokemonData.Type.NONE
-	if type_name.contains("Veneno"):
-		starter_data.secondary_type = PokemonData.Type.POISON
+	starter_data.secondary_type = PokemonData.Type.POISON if type_name.contains("Veneno") else PokemonData.Type.NONE
 	GameManager.captured_pokemons.clear()
 	GameManager.capture_pokemon(starter_data)
 	GameManager.active_battle_team.clear()
@@ -109,13 +229,15 @@ func _on_yes_pressed() -> void:
 	get_tree().change_scene_to_file("res://scenes/ui/TeamSelectScene.tscn")
 
 func _species_id(species_name: String) -> int:
-	# A tabela ainda não possui IDs nacionais; hash fornece um ID estável
-	# para este protótipo. Troque por IDs oficiais ao expandir a base de dados.
 	return absi(species_name.to_lower().hash()) % 100000
 
 func _on_no_pressed() -> void:
-	# Cancelar a confirmação limpa o estado temporário e devolve a seleção.
 	waiting_for_confirmation = false
 	selected_pokemon_info.clear()
 	choices_container.hide()
+	btn_yes.text = "SIM"
+	btn_no.text = "VOLTAR"
+	preview_name.text = ""
+	preview_sprite.texture = null
+	$HoverPreviewPanel.scale = Vector2.ONE
 	update_ui()
