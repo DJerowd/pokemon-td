@@ -371,36 +371,26 @@ func play_capture_animation(target: Node2D, ball_name: String, was_captured: boo
 	await close_tween.finished
 	if is_instance_valid(flight):
 		flight.queue_free()
+	var result_label := Label.new()
+	result_label.z_index = 220
+	result_label.add_theme_font_size_override("font_size", 18)
+	result_label.add_theme_color_override("font_shadow_color", Color.BLACK)
+	result_label.add_theme_constant_override("shadow_offset_x", 2)
+	result_label.add_theme_constant_override("shadow_offset_y", 2)
 	if was_captured:
-		var result_label := Label.new()
 		result_label.text = "CAPTURADO!"
 		result_label.position = target_screen + Vector2(-55, -42)
-		result_label.z_index = 220
-		result_label.add_theme_font_size_override("font_size", 18)
 		result_label.add_theme_color_override("font_color", Color(0.55, 1.0, 0.58))
-		result_label.add_theme_color_override("font_shadow_color", Color.BLACK)
-		result_label.add_theme_constant_override("shadow_offset_x", 2)
-		result_label.add_theme_constant_override("shadow_offset_y", 2)
-		add_child(result_label)
-		var result_tween := create_tween()
-		result_tween.set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
-		result_tween.tween_property(result_label, "position:y", result_label.position.y - 24.0, 0.45)
-		result_tween.parallel().tween_property(result_label, "modulate:a", 0.0, 0.75)
-		result_tween.tween_callback(result_label.queue_free)
 	else:
-		var result_label := Label.new()
 		result_label.text = "ESCAPOU!"
 		result_label.position = target_screen + Vector2(-45, -42)
-		result_label.z_index = 220
-		result_label.add_theme_font_size_override("font_size", 18)
 		result_label.add_theme_color_override("font_color", Color(1.0, 0.75, 0.45))
-		result_label.add_theme_color_override("font_shadow_color", Color.BLACK)
-		add_child(result_label)
-		var result_tween := create_tween()
-		result_tween.set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
-		result_tween.tween_property(result_label, "position:y", result_label.position.y - 16.0, 0.35)
-		result_tween.parallel().tween_property(result_label, "modulate:a", 0.0, 0.65)
-		result_tween.tween_callback(result_label.queue_free)
+	add_child(result_label)
+	var result_tween := create_tween()
+	result_tween.set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
+	result_tween.tween_property(result_label, "position:y", result_label.position.y - 24.0, 0.45)
+	result_tween.parallel().tween_property(result_label, "modulate:a", 0.0, 0.75)
+	result_tween.tween_callback(result_label.queue_free)
 
 func _find_tower_at_screen_position(screen_position: Vector2) -> Node:
 	var world_position := get_viewport().get_canvas_transform().affine_inverse() * screen_position
