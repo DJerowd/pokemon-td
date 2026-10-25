@@ -139,6 +139,8 @@ func _on_attack_timeout() -> void:
 func _on_click_area_input_event(_viewport: Viewport, event: InputEvent, _shape_idx: int) -> void:
 	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
 		is_selected = true
+		GameManager.selected_battle_pokemon = pokemon_data
+		GameManager.stats_changed.emit()
 		queue_redraw()
 		open_tower_inspector()
 		get_viewport().set_input_as_handled()
