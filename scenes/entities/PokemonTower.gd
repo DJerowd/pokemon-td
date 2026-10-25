@@ -34,6 +34,7 @@ var invalid_sprite_warning_shown: bool = false
 var current_hp: float = 1.0
 var max_hp: float = 1.0
 var status_effect_timer: float = 0.0
+var inspector_menu: Control = null
 @onready var attack_timer: Timer = $Timer
 @onready var range_area: Area2D = $Area2D
 @onready var click_area: Area2D = $ClickArea
@@ -212,11 +213,22 @@ func open_tower_inspector() -> void:
 	for child in ui_layer.get_children():
 		if child is Control and child.get_script() == load("res://scenes/ui/TowerInspectorMenu.gd"):
 			child.queue_free()
+	# O inspetor fica na UI e acompanha a torre selecionada sem escurecer o campo.
+	var old_menu := ui_layer.find_child("TowerInspectorMenu", true, false)
+	if old_menu:
+		old_menu.queue_free()
 	var menu := inspector_scene.instantiate() as Control
+	menu.name = "TowerInspectorMenu"
 	menu.set("target_pokemon", pokemon_data)
 	menu.set("target_tower", self)
 	menu.z_index = 100
 	ui_layer.add_child(menu)
+	inspector_menu = menu
+	if current_scene.has_node("Camera2D"):
+		var camera := current_scene.get_node("Camera2D") as Camera2D
+		camera.global_position = global_position
+		if not camera.is_in_group("game_camera"):
+			camera.add_to_group("game_camera")
 
 func _exit_tree() -> void:
 	if pokemon_data:
