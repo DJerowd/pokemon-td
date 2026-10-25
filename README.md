@@ -149,7 +149,7 @@ A torre usa `Area2D` para saber quando corpos entram ou saem do alcance. A área
 ## Bolsa, itens, Pokébolas e menu de partida
 
 - A HUD ocupa a viewport; o botão **Menu** fica na barra superior. O menu permite continuar, reiniciar a partida ou desistir com confirmação.
-- A bolsa fica no canto inferior direito. Ela lista os itens de cura/status e as Pokébolas com quantidades disponíveis; clicar em um item prepara seu uso, e arrastar o item para uma torre aplica o efeito.
+- A bolsa fica no canto inferior direito e usa uma pequena sequência de frames ao abrir/fechar. Ela lista os itens de cura/status e as Pokébolas com quantidades disponíveis; clicar em um item prepara seu uso, clicar numa torre aplica o efeito e arrastar o item para uma torre também aplica o efeito.
 - Para capturar com uma bola específica, arraste a Pokébola da bolsa até um inimigo. A bola voa em direção ao alvo e mostra o resultado da tentativa. Também é possível selecionar a bola na bolsa e clicar diretamente em um inimigo para usar a bola selecionada.
 - Os scripts esperam os PNGs opcionais em `assets/ui/pokemon_items.png`, `assets/ui/pokemon_bags.png` e `assets/ui/pokeballs_bw.png`. Veja `assets/ui/README.md` para os links originais e a configuração dos recortes. Sem esses arquivos, os controles usam rótulos de texto como alternativa.
 - A imagem de referência de fontes não é uma fonte pronta para Godot. Para usar os glifos reais, é necessário obter uma fonte compatível ou converter a folha em fonte bitmap com descritor de caracteres.
