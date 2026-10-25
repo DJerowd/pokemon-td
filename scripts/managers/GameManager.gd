@@ -88,11 +88,17 @@ func use_item(item_name: String, target: PokemonData) -> bool:
 		return false
 	match item_name:
 		"Poção":
-			var max_hp := maxf(1.0, target.hp)
-			var current_hp := target.current_hp if target.current_hp > 0.0 else max_hp
-			if current_hp >= max_hp:
-				return false
-			target.current_hp = minf(max_hp, current_hp + 20.0)
+			var tower := _find_deployed_tower(target)
+			if tower != null and tower.has_method("heal"):
+				if not bool(tower.call("heal", 20.0)):
+					return false
+				target.current_hp = float(tower.get("current_hp"))
+			else:
+				var max_hp := maxf(1.0, target.hp)
+				var current_hp := target.current_hp if target.current_hp > 0.0 else max_hp
+				if current_hp >= max_hp:
+					return false
+				target.current_hp = minf(max_hp, current_hp + 20.0)
 		"Antídoto":
 			if target.status_condition != "Envenenado":
 				return false
@@ -136,3 +142,9 @@ func deploy_pokemon(pokemon: PokemonData) -> bool:
 func undeploy_pokemon(pokemon: PokemonData) -> void:
 	if deployed_pokemons.erase(pokemon):
 		team_changed.emit()
+
+func _find_deployed_tower(pokemon: PokemonData) -> Node:
+	for candidate in get_tree().get_nodes_in_group("towers"):
+		if is_instance_valid(candidate) and candidate.get("pokemon_data") == pokemon:
+			return candidate
+	return null
