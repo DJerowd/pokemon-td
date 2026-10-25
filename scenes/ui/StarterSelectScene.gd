@@ -2,6 +2,7 @@ extends Control
 
 const SPRITE_SHEET_PATH := "res://assets/textures/DS _ DSi - Pokemon Black 2 _ White 2 - Overworld - Pokemon (Overworld).png"
 const SPRITE_FRAME_SIZE := Vector2(32, 32)
+const SPRITE_FACTORY = preload("res://scripts/data/SpriteFrameFactory.gd")
 
 @onready var title_label: Label = $TitleLabel
 @onready var pokeball_buttons: Array[TextureButton] = [%Pokeball1, %Pokeball2, %Pokeball3]
@@ -18,14 +19,12 @@ var current_gen_index: int = 0
 var selected_pokemon_info: Dictionary = {}
 var waiting_for_confirmation: bool = false
 var sprite_sheet: Texture2D
-var starter_sprite_previews: Array[TextureRect] = []
-var starter_name_labels: Array[Label] = []
 
 func _ready() -> void:
 	sprite_sheet = load(SPRITE_SHEET_PATH) as Texture2D
 	_add_background_tint()
-	_build_starter_preview_row()
 	choices_container.hide()
+	$HoverPreviewPanel.hide()
 	_style_screen()
 	btn_left.pressed.connect(_on_previous_generation)
 	btn_right.pressed.connect(_on_next_generation)
@@ -34,8 +33,6 @@ func _ready() -> void:
 	for index in range(pokeball_buttons.size()):
 		var button := pokeball_buttons[index]
 		button.mouse_entered.connect(on_pokeball_hover.bind(index))
-		button.mouse_entered.connect(_animate_starter.bind(index, true))
-		button.mouse_exited.connect(_animate_starter.bind(index, false))
 		button.pressed.connect(on_pokeball_clicked.bind(index))
 	update_ui()
 
@@ -47,42 +44,6 @@ func _add_background_tint() -> void:
 	tint.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	add_child(tint)
 	move_child(tint, 1)
-
-func _build_starter_preview_row() -> void:
-	var layout := get_node_or_null("VBoxContainer") as VBoxContainer
-	if layout == null:
-		return
-	var row := HBoxContainer.new()
-	row.name = "StarterPreviewRow"
-	row.alignment = BoxContainer.ALIGNMENT_CENTER
-	row.add_theme_constant_override("separation", 28)
-	row.custom_minimum_size = Vector2(420, 142)
-	row.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
-	layout.add_child(row)
-	layout.move_child(row, 0)
-	for index in range(3):
-		var card := VBoxContainer.new()
-		card.name = "StarterPreviewCard%d" % index
-		card.alignment = BoxContainer.ALIGNMENT_CENTER
-		card.custom_minimum_size = Vector2(112, 132)
-		card.add_theme_constant_override("separation", 2)
-		var sprite_view := TextureRect.new()
-		sprite_view.name = "Sprite"
-		sprite_view.custom_minimum_size = Vector2(96, 96)
-		sprite_view.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-		sprite_view.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-		sprite_view.pivot_offset = Vector2(48, 48)
-		sprite_view.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		var name_label := Label.new()
-		name_label.name = "SpeciesName"
-		name_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		name_label.add_theme_color_override("font_color", Color(0.86, 0.96, 1.0))
-		name_label.add_theme_font_size_override("font_size", 14)
-		card.add_child(sprite_view)
-		card.add_child(name_label)
-		row.add_child(card)
-		starter_sprite_previews.append(sprite_view)
-		starter_name_labels.append(name_label)
 
 func _style_screen() -> void:
 	title_label.add_theme_color_override("font_color", Color(0.78, 0.94, 1.0))
@@ -130,20 +91,6 @@ func update_ui() -> void:
 	if not waiting_for_confirmation:
 		choices_container.hide()
 		dialogue_label.text = "Escolha uma Pokébola para conhecer seu parceiro."
-	_refresh_starter_sprites(generation)
-
-func _refresh_starter_sprites(generation: Dictionary) -> void:
-	var starters: Array = generation.get("starters", [])
-	for index in range(starter_sprite_previews.size()):
-		var starter_view := starter_sprite_previews[index]
-		if index >= starters.size() or not starters[index] is Dictionary:
-			starter_view.texture = null
-			starter_name_labels[index].text = ""
-			continue
-		var starter: Dictionary = starters[index]
-		starter_view.texture = _create_starter_texture(starter)
-		starter_name_labels[index].text = str(starter.get("name", "Pokémon"))
-		starter_view.modulate = Color.WHITE
 
 func _create_starter_texture(starter: Dictionary) -> Texture2D:
 	if sprite_sheet == null:
@@ -153,21 +100,7 @@ func _create_starter_texture(starter: Dictionary) -> Texture2D:
 	var bounds := Rect2(Vector2.ZERO, sprite_sheet.get_size())
 	if origin.x < 0.0 or origin.y < 0.0 or not bounds.encloses(rect):
 		return null
-	var atlas := AtlasTexture.new()
-	atlas.atlas = sprite_sheet
-	atlas.region = rect
-	return atlas
-
-func _animate_starter(index: int, hovered: bool) -> void:
-	if index < 0 or index >= starter_sprite_previews.size():
-		return
-	var sprite_view := starter_sprite_previews[index]
-	var tween := create_tween()
-	tween.set_trans(Tween.TRANS_BACK)
-	tween.set_ease(Tween.EASE_OUT)
-	tween.tween_property(sprite_view, "scale", Vector2(1.18, 1.18) if hovered else Vector2.ONE, 0.18)
-	if hovered:
-		sprite_view.modulate = Color(1.0, 1.0, 1.0, 1.0)
+	return SPRITE_FACTORY.make_frame(sprite_sheet, rect)
 
 func _on_previous_generation() -> void:
 	change_generation(-1)
@@ -191,10 +124,7 @@ func on_pokeball_hover(index: int) -> void:
 	var starter_name := str(starter.get("name", "Pokémon desconhecido"))
 	var starter_type := str(starter.get("type", "Tipo desconhecido"))
 	dialogue_label.text = "%s  •  Tipo: %s" % [starter_name, starter_type]
-	preview_name.text = starter_name
-	preview_sprite.texture = _create_starter_texture(starter)
-	var tween := create_tween()
-	tween.tween_property($HoverPreviewPanel, "scale", Vector2(1.04, 1.04), 0.12)
+	# A prévia de sprite só aparece após clicar em uma Pokébola.
 
 func on_pokeball_clicked(index: int) -> void:
 	if waiting_for_confirmation:
@@ -208,6 +138,14 @@ func on_pokeball_clicked(index: int) -> void:
 		return
 	selected_pokemon_info = starter
 	waiting_for_confirmation = true
+	preview_name.text = str(starter.get("name", "Pokémon"))
+	preview_sprite.texture = _create_starter_texture(starter)
+	$HoverPreviewPanel.show()
+	$HoverPreviewPanel.scale = Vector2(0.92, 0.92)
+	var preview_tween := create_tween()
+	preview_tween.set_trans(Tween.TRANS_BACK)
+	preview_tween.set_ease(Tween.EASE_OUT)
+	preview_tween.tween_property($HoverPreviewPanel, "scale", Vector2.ONE, 0.2)
 	dialogue_label.text = "Deseja escolher %s como seu Pokémon inicial?" % str(starter.get("name", "este Pokémon"))
 	btn_yes.text = "SIM"
 	btn_no.text = "VOLTAR"
@@ -249,5 +187,6 @@ func _on_no_pressed() -> void:
 	btn_no.text = "VOLTAR"
 	preview_name.text = ""
 	preview_sprite.texture = null
+	$HoverPreviewPanel.hide()
 	$HoverPreviewPanel.scale = Vector2.ONE
 	update_ui()
