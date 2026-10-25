@@ -48,6 +48,7 @@ func assign_pokemon_to_slot(index: int, pokemon_data: PokemonData) -> void:
 		if current_team_selection[i] == pokemon_data:
 			current_team_selection[i] = null
 			var panel := team_slots_row.get_child(i)
+			panel.set("assigned_pokemon", null)
 			for child in panel.get_children():
 				panel.remove_child(child)
 				child.queue_free()
