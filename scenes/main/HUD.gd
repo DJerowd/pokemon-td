@@ -37,6 +37,7 @@ var pending_item_name: String = ""
 var drag_preview: Control
 var bag_sheet: Texture2D
 var bag_icon_texture: AtlasTexture
+var balls_bag_icon_texture: AtlasTexture
 var item_sheet: Texture2D
 var ball_sheet: Texture2D
 
@@ -128,8 +129,13 @@ func _create_bag_icon() -> void:
 	bag_icon_texture.atlas = bag_sheet
 	bag_icon_texture.region = Rect2(0, 0, 68, 72)
 	bag_button.icon = bag_icon_texture
-	bag_button.text = ""
+	bag_button.text = "ITENS"
 	bag_button.icon_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	balls_bag_icon_texture = AtlasTexture.new()
+	balls_bag_icon_texture.atlas = bag_sheet
+	balls_bag_icon_texture.region = Rect2(0, 0, 52, 56)
+	balls_button.icon = balls_bag_icon_texture
+	balls_button.icon_alignment = HORIZONTAL_ALIGNMENT_CENTER
 
 func _animate_bag_icon(opening: bool) -> void:
 	if bag_icon_texture == null:
