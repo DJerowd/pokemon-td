@@ -4,76 +4,72 @@ var occupied: bool = false
 var current_tower: Node2D = null
 
 func _ready() -> void:
-	# O slot começa invisível até que o jogador selecione um Pokémon para posicionar
 	visible = false
 
 func _process(_delta: float) -> void:
-	# O slot só fica visível se houver um Pokémon selecionado na barra inferior
-	visible = (GameManager.selected_pokemon_to_place != null)
+	# Feedback visual: slots aparecem apenas durante o posicionamento.
+	visible = GameManager.selected_pokemon_to_place != null and not GameManager.game_over
 
-# O Godot 2D detecta cliques em nós Area2D se 'Input Pickable' estiver ativado no Inspetor
 func _input_event(_viewport: Viewport, event: InputEvent, _shape_idx: int) -> void:
-	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
-		# Só prossegue se houver um Pokémon selecionado para posicionar
-		if GameManager.selected_pokemon_to_place == null:
-			return
-			
-		var pokemon = GameManager.selected_pokemon_to_place
-		
-		# Se este slot específico já estiver ocupado por outra torre, não faz nada
-		if occupied:
-			print("Este slot já está ocupado!")
-			return
-			
-		# NOVO: Se o Pokémon já estiver posicionado em outro slot, removemos ele de lá primeiro (Relocação)
-		relocate_existing_pokemon(pokemon)
-		
-		# Posiciona a torre neste novo slot
-		place_pokemon(pokemon)
-		
-		# Desseleciona o Pokémon automaticamente após o posicionamento
+	if not (event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT):
+		return
+	var pokemon: PokemonData = GameManager.selected_pokemon_to_place
+	if pokemon == null:
+		return
+	if GameManager.game_over or not GameManager.can_deploy_pokemon(pokemon):
+		GameManager.selected_pokemon_to_place = null
+		return
+	if occupied:
+		print("Este espaço já está ocupado.")
+		return
+
+	# Move a torre existente antes de criar a nova, para impedir cópias da mesma espécie.
+	relocate_existing_pokemon(pokemon)
+	if place_pokemon(pokemon):
 		GameManager.selected_pokemon_to_place = null
 		get_viewport().set_input_as_handled()
 
-# Função para encontrar e mover a torre caso o Pokémon já esteja no mapa
-func relocate_existing_pokemon(pokemon_data: Resource) -> void:
-	var towers_node = get_tree().current_scene.find_child("Towers", true, false)
-	if towers_node:
-		for tower in towers_node.get_children():
-			if "pokemon_data" in tower and tower.pokemon_data == pokemon_data:
-				# Libera o slot antigo onde a torre estava
-				if "slot_reference" in tower and tower.slot_reference and is_instance_valid(tower.slot_reference):
-					tower.slot_reference.occupied = false
-					tower.slot_reference.current_tower = null
-				# Remove a torre antiga do mapa
-				tower.queue_free()
-				break
-				
-	# Remove temporariamente da lista de deployed para evitar duplicatas na lista global
-	if pokemon_data in GameManager.deployed_pokemons:
-		GameManager.deployed_pokemons.erase(pokemon_data)
+func relocate_existing_pokemon(pokemon_data: PokemonData) -> void:
+	var towers_node := get_tree().current_scene.find_child("Towers", true, false)
+	if towers_node == null:
+		return
+	for tower in towers_node.get_children():
+		if tower.get("pokemon_data") == pokemon_data:
+			# queue_free libera o slot no _exit_tree; liberamos também agora
+			# porque a nova torre será criada antes do próximo frame.
+			var old_slot = tower.get("slot_reference")
+			if old_slot and is_instance_valid(old_slot):
+				old_slot.occupied = false
+				old_slot.current_tower = null
+			towers_node.remove_child(tower) # _exit_tree libera o registro antes do novo deploy.
+			tower.queue_free()
+			break
 
-func place_pokemon(pokemon_data: Resource) -> void:
+func place_pokemon(pokemon_data: PokemonData) -> bool:
+	var towers_node := get_tree().current_scene.find_child("Towers", true, false) as Node2D
+	if towers_node == null:
+		push_error("Não foi encontrado o nó Towers na cena de jogo.")
+		return false
+
+	var tower_scene := load("res://scenes/entities/PokemonTower.tscn") as PackedScene
+	if tower_scene == null:
+		push_error("Não foi possível carregar PokemonTower.tscn.")
+		return false
+	var tower := tower_scene.instantiate() as Node2D
+	if tower == null:
+		push_error("A raiz de PokemonTower.tscn precisa ser Node2D.")
+		return false
+
+	if not GameManager.deploy_pokemon(pokemon_data):
+		tower.free()
+		push_warning("Este Pokémon já está posicionado ou não pertence à equipe ativa.")
+		return false
+	tower.set("pokemon_data", pokemon_data)
+	tower.set("slot_reference", self)
+	tower.z_index = 10
+	towers_node.add_child(tower)
+	tower.global_position = global_position
 	occupied = true
-	GameManager.deployed_pokemons.append(pokemon_data)
-	
-	# Carrega e instancia a torre do Pokémon
-	var tower_scene = load("res://scenes/entities/PokemonTower.tscn")
-	if tower_scene:
-		var tower = tower_scene.instantiate()
-		tower.pokemon_data = pokemon_data
-		tower.global_position = global_position # Posiciona exatamente no centro do slot
-		tower.slot_reference = self # Guarda referência para liberar o slot caso o Pokémon saia
-		
-		# GARANTE A SOBREPOSIÇÃO: Z-Index maior faz a torre aparecer por cima do slot
-		tower.z_index = 10
-		
-		# Adiciona ao container de torres na cena principal
-		var towers_node = get_tree().current_scene.find_child("Towers", true, false)
-		if towers_node:
-			towers_node.add_child(tower)
-		else:
-			get_tree().current_scene.add_child(tower)
-			
-		current_tower = tower
-		print("Pokémon ", pokemon_data.species_name, " posicionado com sucesso no slot!")
+	current_tower = tower
+	print("Pokémon ", pokemon_data.species_name, " posicionado.")
+	return true

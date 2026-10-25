@@ -1,0 +1,24 @@
+[gd_resource type="Resource" script_class="PokemonData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/PokemonData.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = 4
+species_name = "Charmander"
+level = 5
+primary_type = 1
+secondary_type = 15
+sprite_origin = Vector2(256, 32)
+frame_size = Vector2(32, 32)
+hp = 39.0
+current_hp = 39.0
+attack = 52.0
+defense = 43.0
+special_attack = 60.0
+special_defense = 50.0
+speed = 65.0
+attack_range = 150.0
+attack_speed = 1.0
+available_moves = Array[String](["Arranhão", "Brasa", "Cortina de Fumaça", ""])
+active_move_index = 0

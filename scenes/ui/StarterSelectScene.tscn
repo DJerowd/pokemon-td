@@ -113,10 +113,15 @@ layout_mode = 0
 offset_right = 40.0
 offset_bottom = 40.0
 
-[node name="PreviewName" type="Label" parent="HoverPreviewPanel" unique_id=1506813759]
+[node name="PreviewContent" type="VBoxContainer" parent="HoverPreviewPanel" unique_id=1639000111]
 layout_mode = 2
+alignment = 1
 
-[node name="PreviewSprite" type="TextureRect" parent="HoverPreviewPanel" unique_id=1300419997]
+[node name="PreviewName" type="Label" parent="HoverPreviewPanel/PreviewContent" unique_id=1506813759]
+layout_mode = 2
+horizontal_alignment = 1
+
+[node name="PreviewSprite" type="TextureRect" parent="HoverPreviewPanel/PreviewContent" unique_id=1300419997]
 layout_mode = 2
 
 [node name="DialogueBox" type="NinePatchRect" parent="." unique_id=35349048]
