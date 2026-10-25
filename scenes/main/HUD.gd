@@ -159,8 +159,8 @@ func _add_section_title(title: String) -> void:
 func _add_inventory_entry(entry_name: String, count: int, kind: String) -> void:
 	var button := Button.new()
 	button.set_script(ITEM_BUTTON_SCRIPT)
-	button.item_name = entry_name
-	button.inventory_kind = kind
+	button.set("item_name", entry_name)
+	button.set("inventory_kind", kind)
 	button.text = "%s    × %d" % [entry_name, count]
 	button.custom_minimum_size = Vector2(260, 38)
 	button.disabled = count <= 0
@@ -313,7 +313,7 @@ func _close_menu() -> void:
 func _restart_match() -> void:
 	get_tree().paused = false
 	GameManager.reset_match()
-	get_tree().reload_current_scene()
+	get_tree().change_scene_to_file(STARTER_SCENE_PATH)
 
 func _confirm_give_up() -> void:
 	var dialog := get_node("GiveUpConfirmation") as ConfirmationDialog
@@ -420,6 +420,24 @@ func _find_tower_at_screen_position(screen_position: Vector2) -> Node:
 			return parent
 	return null
 
+func _find_enemy_at_screen_position(screen_position: Vector2) -> Node:
+	var world_position := get_viewport().get_canvas_transform().affine_inverse() * screen_position
+	var query := PhysicsPointQueryParameters2D.new()
+	query.position = world_position
+	query.collide_with_areas = true
+	query.collide_with_bodies = true
+	var hits := get_viewport().world_2d.direct_space_state.intersect_point(query, 16)
+	for hit in hits:
+		var collider := hit.get("collider") as Node
+		if collider == null:
+			continue
+		if collider.is_in_group("enemies"):
+			return collider
+		var parent := collider.get_parent()
+		if parent and parent.is_in_group("enemies"):
+			return parent
+	return null
+
 func _apply_item_to_tower(item_name: String, tower: Node) -> void:
 	if tower == null or not is_instance_valid(tower):
 		return
@@ -436,7 +454,7 @@ func _can_drop_data(_at_position: Vector2, data: Variant) -> bool:
 	return data is Dictionary and data.get("kind", "") in ["item", "ball"]
 
 func _drop_data(_at_position: Vector2, data: Variant) -> void:
-	var target := _find_tower_at_screen_position(get_viewport().get_mouse_position())
+	var target: Node = _find_enemy_at_screen_position(get_viewport().get_mouse_position()) if data.get("kind", "") == "ball" else _find_tower_at_screen_position(get_viewport().get_mouse_position())
 	if target == null:
 		pending_item_name = ""
 		drag_preview.visible = false
