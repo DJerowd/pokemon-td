@@ -31,6 +31,7 @@ func start_next_wave() -> bool:
 
 	current_wave += 1
 	GameManager.current_wave = current_wave
+	GameManager.stats_changed.emit()
 	enemies_to_spawn = 3 + current_wave * 2
 	spawn_failed = false
 	is_wave_active = true
