@@ -449,6 +449,7 @@ script = ExtResource("5_2u0ke")
 [node name="HUD" parent="UI" unique_id=1160260611 instance=ExtResource("7_2u0ke")]
 
 [node name="MarginContainer" type="MarginContainer" parent="UI" unique_id=1106874870]
+mouse_filter = 2
 anchors_preset = 12
 anchor_top = 1.0
 anchor_right = 1.0
@@ -462,6 +463,7 @@ theme_override_constants/margin_right = 12
 theme_override_constants/margin_bottom = 12
 
 [node name="SlotsContainer" type="HBoxContainer" parent="UI/MarginContainer" unique_id=1362208174]
+mouse_filter = 1
 custom_minimum_size = Vector2(0, 64)
 layout_mode = 2
 size_flags_horizontal = 4
