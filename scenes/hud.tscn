@@ -66,6 +66,26 @@ text = "1"
 layout_mode = 2
 size_flags_horizontal = 3
 
+[node name="LblSelectedBall" type="Label" parent="TopBar" unique_id=1928812901]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Poké Bola: 5"
+
+[node name="BtnCycleBall" type="Button" parent="TopBar" unique_id=1928812902]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Trocar bola"
+
+[node name="BtnPotion" type="Button" parent="TopBar" unique_id=1928812903]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Poção (3)"
+
+[node name="BtnStatusHeal" type="Button" parent="TopBar" unique_id=1928812904]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Cura status"
+
 [node name="BtnStartWave" type="Button" parent="TopBar" unique_id=1962725397]
 unique_name_in_owner = true
 layout_mode = 2
