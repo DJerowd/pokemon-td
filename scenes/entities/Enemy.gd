@@ -42,6 +42,7 @@ func _process(delta: float) -> void:
 		return
 	var previous_progress := maxf(0.0, progress - 3.0)
 	var next_progress := minf(get_parent_path_length(), progress + 3.0)
+	var previous_direction := current_direction
 	var curve := get_parent_curve()
 	if curve:
 		var direction_vector := curve.sample_baked(next_progress) - curve.sample_baked(previous_progress)
@@ -49,6 +50,8 @@ func _process(delta: float) -> void:
 			current_direction = 3 if direction_vector.x >= 0.0 else 2
 		else:
 			current_direction = 0 if direction_vector.y >= 0.0 else 1
+	if current_direction != previous_direction:
+		_update_sprite()
 	anim_timer += delta
 	tower_attack_timer += delta
 	_attack_nearby_tower()
