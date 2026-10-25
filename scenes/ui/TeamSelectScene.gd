@@ -94,7 +94,7 @@ func populate_storage_grid() -> void:
 		if pokemon == null:
 			continue
 		var card := Button.new()
-		card.name = "PokemonCard_%s" % pokemon.species_name.validate_node_name()
+		card.name = "PokemonCard_%s" % pokemon.species_name.replace(" ", "_")
 		card.text = "%s\nNv. %d" % [pokemon.species_name, pokemon.level]
 		card.custom_minimum_size = Vector2(126, 112)
 		card.size_flags_horizontal = Control.SIZE_EXPAND_FILL
