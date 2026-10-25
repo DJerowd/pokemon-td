@@ -34,10 +34,10 @@ var wave_rosters: Array = [
 	],
 	[
 		{"name":"Mudkip","origin":Vector2(576, 2432),"hp":84,"speed":88.0,"capturable":true,"capture_rate":0.72,"reward":45,"type":PokemonData.Type.WATER},
-		{"name":"Turtwig","origin":Vector2(0, 3500),"hp":94,"speed":76.0,"capturable":true,"capture_rate":0.7,"reward":50,"type":PokemonData.Type.GRASS},
-		{"name":"Chimchar","origin":Vector2(192, 3500),"hp":78,"speed":126.0,"capturable":true,"capture_rate":0.68,"reward":50,"type":PokemonData.Type.FIRE},
-		{"name":"Piplup","origin":Vector2(384, 3500),"hp":90,"speed":90.0,"capturable":true,"capture_rate":0.68,"reward":50,"type":PokemonData.Type.WATER},
-		{"name":"Sentinela Sinnoh","origin":Vector2(0, 3500),"hp":230,"speed":62.0,"capturable":false,"capture_rate":0.0,"reward":160,"type":PokemonData.Type.GRASS,"status":"Envenenado"}
+		{"name":"Turtwig","origin":Vector2(0, 3488),"hp":94,"speed":76.0,"capturable":true,"capture_rate":0.7,"reward":50,"type":PokemonData.Type.GRASS},
+		{"name":"Chimchar","origin":Vector2(192, 3488),"hp":78,"speed":126.0,"capturable":true,"capture_rate":0.68,"reward":50,"type":PokemonData.Type.FIRE},
+		{"name":"Piplup","origin":Vector2(384, 3488),"hp":90,"speed":90.0,"capturable":true,"capture_rate":0.68,"reward":50,"type":PokemonData.Type.WATER},
+		{"name":"Sentinela Sinnoh","origin":Vector2(0, 3488),"hp":230,"speed":62.0,"capturable":false,"capture_rate":0.0,"reward":160,"type":PokemonData.Type.GRASS,"status":"Envenenado"}
 	],
 	[
 		{"name":"Snivy","origin":Vector2(0, 4800),"hp":102,"speed":140.0,"capturable":true,"capture_rate":0.65,"reward":60,"type":PokemonData.Type.GRASS},
