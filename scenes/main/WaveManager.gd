@@ -125,8 +125,14 @@ func _spawn_single_enemy() -> void:
 	enemy.set("capture_rate", float(profile.get("capture_rate", 0.75)))
 	enemy.set("reward_money", int(profile.get("reward", 25)))
 	enemy.set("status_inflicted", str(profile.get("status", "")))
-	enemy.set("progress_ratio", 0.0)
 	path_node.add_child(enemy)
+	# PathFollow2D precisa estar dentro de um Path2D já inserido na árvore
+	# antes de alterar progress_ratio.
+	if not is_instance_valid(enemy.get_parent()) or not (enemy.get_parent() is Path2D) or not enemy.get_parent().is_inside_tree():
+		enemy.queue_free()
+		_fail_wave("O caminho de inimigos não está pronto na árvore da cena.")
+		return
+	enemy.progress_ratio = 0.0
 	enemies_to_spawn = spawn_queue.size()
 	if spawn_queue.is_empty():
 		spawn_timer.stop()
