@@ -99,7 +99,7 @@ func _create_bag_button() -> void:
 	bag_button.offset_top = -88.0
 	bag_button.offset_right = -18.0
 	bag_button.offset_bottom = -16.0
-	bag_button.z_index = 30
+	bag_button.z_index = 100
 	bag_button.mouse_filter = Control.MOUSE_FILTER_STOP
 	bag_button.pressed.connect(_toggle_bag)
 	add_child(bag_button)
@@ -117,7 +117,7 @@ func _create_bag_button() -> void:
 	balls_button.offset_top = -88.0
 	balls_button.offset_right = -108.0
 	balls_button.offset_bottom = -16.0
-	balls_button.z_index = 30
+	balls_button.z_index = 100
 	balls_button.mouse_filter = Control.MOUSE_FILTER_STOP
 	balls_button.pressed.connect(_toggle_balls_bag)
 	add_child(balls_button)
@@ -165,7 +165,7 @@ func _make_inventory_panel(panel_name: String, top_left_offset: Vector2, bottom_
 	panel.offset_top = top_left_offset.y
 	panel.offset_right = bottom_right_offset.x
 	panel.offset_bottom = bottom_right_offset.y
-	panel.z_index = 40
+	panel.z_index = 110
 	panel.mouse_filter = Control.MOUSE_FILTER_STOP
 	panel.add_theme_stylebox_override("panel", _make_panel_style(Color(0.055, 0.12, 0.24, 0.98), Color(0.25, 0.78, 0.96)))
 	var margin := MarginContainer.new()
@@ -321,7 +321,7 @@ func _process(_delta: float) -> void:
 	if drag_preview and drag_preview.visible:
 		drag_preview.position = get_viewport().get_mouse_position() + Vector2(12, 12)
 
-func _input(event: InputEvent) -> void:
+func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
 		if bag_panel.visible and not bag_panel.get_global_rect().has_point(event.position) and not bag_button.get_global_rect().has_point(event.position):
 			_animate_bag_icon(false)
