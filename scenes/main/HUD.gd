@@ -245,6 +245,7 @@ func _create_confirm_dialog() -> void:
 	dialog.cancel_button_text = "Continuar jogando"
 	dialog.process_mode = Node.PROCESS_MODE_ALWAYS
 	dialog.confirmed.connect(_give_up)
+	dialog.canceled.connect(_close_menu)
 	add_child(dialog)
 
 func _create_drag_preview() -> void:
