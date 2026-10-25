@@ -11,8 +11,8 @@ const SPRITE_FRAME_SIZE := Vector2(32, 32)
 @onready var btn_no: Button = $DialogueBox/ChoicesContainer/BtnNo
 @onready var btn_left: Button = $BtnLeft
 @onready var btn_right: Button = $BtnRight
-@onready var preview_name: Label = $HoverPreviewPanel/PreviewName
-@onready var preview_sprite: TextureRect = $HoverPreviewPanel/PreviewSprite
+@onready var preview_name: Label = $HoverPreviewPanel/PreviewContent/PreviewName
+@onready var preview_sprite: TextureRect = $HoverPreviewPanel/PreviewContent/PreviewSprite
 
 var current_gen_index: int = 0
 var selected_pokemon_info: Dictionary = {}
@@ -23,6 +23,7 @@ var starter_name_labels: Array[Label] = []
 
 func _ready() -> void:
 	sprite_sheet = load(SPRITE_SHEET_PATH) as Texture2D
+	_add_background_tint()
 	_build_starter_preview_row()
 	choices_container.hide()
 	_style_screen()
@@ -37,6 +38,15 @@ func _ready() -> void:
 		button.mouse_exited.connect(_animate_starter.bind(index, false))
 		button.pressed.connect(on_pokeball_clicked.bind(index))
 	update_ui()
+
+func _add_background_tint() -> void:
+	var tint := ColorRect.new()
+	tint.name = "Black2BlueTint"
+	tint.color = Color(0.015, 0.055, 0.12, 0.24)
+	tint.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	tint.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	add_child(tint)
+	move_child(tint, 1)
 
 func _build_starter_preview_row() -> void:
 	var layout := get_node_or_null("VBoxContainer") as VBoxContainer
