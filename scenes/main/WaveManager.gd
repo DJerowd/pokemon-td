@@ -105,14 +105,16 @@ func _spawn_single_enemy() -> void:
 	var species_name := str(profile.get("name", "Pokémon"))
 	var species_overrides := {
 		"hp": float(profile.get("hp", 50.0)),
-		"sprite_origin": profile.get("origin", Vector2.ZERO),
 		"display_name": species_name
 	}
+	var species_exists := not StarterDatabase.get_species(species_name).is_empty()
 	var wild_data := StarterDatabase.create_pokemon_data(species_name, 3 + current_wave * 2, species_overrides)
-	if StarterDatabase.get_species(species_name).is_empty():
-		# Fallback for custom/boss names: use a known species' base data, but
-		# preserve the custom display name, sprite, HP and wave profile.
-		wild_data = StarterDatabase.create_pokemon_data("Bulbasaur", 3 + current_wave * 2, species_overrides)
+	if not species_exists:
+		# Variantes especiais reutilizam os dados e o sprite de uma espécie-base,
+		# mantendo nome e atributos específicos do encontro.
+		var fallback_overrides := species_overrides.duplicate()
+		fallback_overrides["sprite_origin"] = profile.get("origin", Vector2.ZERO)
+		wild_data = StarterDatabase.create_pokemon_data("Bulbasaur", 3 + current_wave * 2, fallback_overrides)
 	wild_data.current_hp = wild_data.hp
 	wild_data.attack = 8.0 + current_wave * 2.0
 
