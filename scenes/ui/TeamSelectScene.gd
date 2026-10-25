@@ -122,6 +122,8 @@ func setup_team_slots() -> void:
 			slot_panel.set_script(load("res://scripts/ui/TeamSlot.gd"))
 			slot_panel.set("slot_index", index)
 			slot_panel.set("team_manager", self)
+			slot_panel.set("assigned_pokemon", null)
+			slot_panel.call("_update_slot_visual")
 			index += 1
 
 func assign_pokemon_to_slot(index: int, pokemon_data: PokemonData) -> void:
@@ -132,9 +134,7 @@ func assign_pokemon_to_slot(index: int, pokemon_data: PokemonData) -> void:
 			current_team_selection[i] = null
 			var previous_panel := team_slots_row.get_child(i)
 			previous_panel.set("assigned_pokemon", null)
-			for child in previous_panel.get_children():
-				previous_panel.remove_child(child)
-				child.queue_free()
+			previous_panel.call("_update_slot_visual")
 	current_team_selection[index] = pokemon_data
 	print(pokemon_data.species_name, " atribuído ao espaço ", index + 1)
 
@@ -142,6 +142,9 @@ func clear_team_slot(index: int) -> void:
 	if index < 0 or index >= current_team_selection.size():
 		return
 	current_team_selection[index] = null
+	var slot_panel := team_slots_row.get_child(index)
+	if slot_panel.has_method("_update_slot_visual"):
+		slot_panel.call("_update_slot_visual")
 
 func _on_start_button_pressed() -> void:
 	var final_team: Array[PokemonData] = []
