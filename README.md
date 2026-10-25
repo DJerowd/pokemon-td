@@ -104,3 +104,25 @@ A torre usa `Area2D` para saber quando corpos entram ou saem do alcance. A área
 - Golpes diferentes mudam a seleção exibida, mas ainda não têm efeitos e danos próprios.
 - As coordenadas de sprite dependem do sprite sheet usado; valide-as visualmente no editor.
 - Esta revisão foi feita por inspeção estática dos arquivos no GitHub. Execute o projeto no Godot para confirmar integração de cenas, colisões e sintaxe na versão instalada.
+
+
+## Melhorias recentes de sprites, combate e inventário
+
+- `SpriteFrameFactory.gd` recorta frames da spritesheet, remove fundos sólidos detectados nos cantos e preserva o canvas 32×32 para reduzir diferenças de escala.
+- Pokémon posicionados continuam animando em repouso; quando há inimigos no alcance, a torre escolhe uma das quatro direções e usa a linha correspondente da spritesheet.
+- O inspetor é adicionado ao `CanvasLayer` da interface para permanecer visível acima do mapa.
+- A barra da equipe exibe sprite e nível até o Pokémon ser posicionado; a barra reage ao sinal `team_changed`.
+- `WaveManager.gd` define rosters pré-programados por onda, com espécies, HP, velocidade, recompensa e política de captura. Alguns inimigos especiais não podem ser capturados.
+- A HUD permite alternar entre Poké Bola, Great Ball e Ultra Ball. As bolas possuem bônus de captura diferentes e consomem inventários separados.
+- Itens disponíveis durante a batalha: Poção (recupera HP), Antídoto (remove envenenamento) e Despertar (remove sono). Clique em uma torre para selecioná-la como alvo e use os botões da HUD. Inimigos especiais podem causar dano e condições de status a Pokémon posicionados.
+
+### Checklist adicional para testar
+
+1. Observe um Pokémon posicionado sem inimigos por perto: a animação idle deve continuar.
+2. Inicie uma onda e confira se a torre vira para cima, baixo, esquerda e direita conforme o inimigo se move.
+3. Clique na torre e confirme que o painel de inspeção aparece no canto superior esquerdo.
+4. Observe os sprites contra o mapa e verifique se o fundo não aparece como um quadrado sólido.
+5. Confirme que o sprite some da barra ao posicionar a unidade e retorna se ela for removida.
+6. Teste os três tipos de Pokébola; Great Ball e Ultra Ball devem ter chance maior que a Poké Bola.
+7. Tente capturar um inimigo especial: a tentativa deve ser recusada sem consumir uma Pokébola.
+8. Deixe um inimigo especial atacar uma torre, depois teste Poção e o item de cura de status.
