@@ -23,8 +23,8 @@ func _ready() -> void:
 	btn_no.pressed.connect(_on_no_pressed)
 	for index in range(pokeball_buttons.size()):
 		var button := pokeball_buttons[index]
-		button.mouse_entered.connect(_on_pokeball_hover.bind(index))
-		button.pressed.connect(_on_pokeball_clicked.bind(index))
+		button.mouse_entered.connect(on_pokeball_hover.bind(index))
+		button.pressed.connect(on_pokeball_clicked.bind(index))
 	update_ui()
 
 func update_ui() -> void:
@@ -84,6 +84,7 @@ func _on_yes_pressed() -> void:
 	starter_data.secondary_type = PokemonData.Type.NONE
 	if type_name.contains("Veneno"):
 		starter_data.secondary_type = PokemonData.Type.POISON
+	GameManager.captured_pokemons.clear()
 	GameManager.capture_pokemon(starter_data)
 	GameManager.active_battle_team.clear()
 	GameManager.stats_changed.emit()
