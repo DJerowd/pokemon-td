@@ -131,10 +131,12 @@ func _on_attack_timeout() -> void:
 	enemies_in_range = enemies_in_range.filter(func(enemy): return is_instance_valid(enemy) and not enemy.is_queued_for_deletion())
 	if enemies_in_range.is_empty():
 		return
-	var target := enemies_in_range[0]
-	if target.has_method("take_damage"):
+	# A lista é não tipada, então declare Variant explicitamente para
+	# evitar falha de inferência do parser ao recuperar o alvo.
+	var target: Variant = enemies_in_range[0]
+	if target != null and is_instance_valid(target) and target.has_method("take_damage"):
 		current_move = pokemon_data.get_active_move() if pokemon_data else "Investida"
-		target.take_damage(damage)
+		target.call("take_damage", damage)
 		print("%s usou %s e causou %.1f de dano." % [pokemon_data.species_name if pokemon_data else "Torre", current_move, damage])
 
 func _on_click_area_input_event(_viewport: Viewport, event: InputEvent, _shape_idx: int) -> void:
