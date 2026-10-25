@@ -120,7 +120,12 @@ func capture_pokemon(pokemon: PokemonData) -> bool:
 	if captured_pokemons.has(pokemon):
 		return false
 	captured_pokemons.append(pokemon)
+	# Capturas entram automaticamente na equipe ativa enquanto houver espaço.
+	# Se os seis espaços já estiverem ocupados, o Pokémon fica no armazenamento.
+	if active_battle_team.size() < 6 and not active_battle_team.has(pokemon):
+		active_battle_team.append(pokemon)
 	stats_changed.emit()
+	team_changed.emit()
 	return true
 
 func is_pokemon_in_active_team(pokemon: PokemonData) -> bool:
