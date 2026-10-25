@@ -205,6 +205,10 @@ func open_tower_inspector() -> void:
 	var current_scene := get_tree().current_scene
 	if current_scene == null:
 		return
+	for candidate in get_tree().get_nodes_in_group("towers"):
+		if is_instance_valid(candidate):
+			candidate.set("is_selected", candidate == self)
+			candidate.queue_redraw()
 	var ui_layer := current_scene.find_child("UI", true, false) as CanvasLayer
 	if ui_layer == null:
 		ui_layer = CanvasLayer.new()
