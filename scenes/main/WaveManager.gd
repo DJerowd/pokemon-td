@@ -111,7 +111,16 @@ func _spawn_single_enemy() -> void:
 	wild_data.hp = float(profile.get("hp", 50.0))
 	wild_data.current_hp = wild_data.hp
 	wild_data.attack = 8.0 + current_wave * 2.0
-	wild_data.primary_type = int(profile.get("type", PokemonData.Type.NORMAL))
+	var profile_type := int(profile.get("type", PokemonData.Type.NORMAL))
+	match profile_type:
+		PokemonData.Type.GRASS:
+			wild_data.primary_type = PokemonData.Type.GRASS
+		PokemonData.Type.FIRE:
+			wild_data.primary_type = PokemonData.Type.FIRE
+		PokemonData.Type.WATER:
+			wild_data.primary_type = PokemonData.Type.WATER
+		_:
+			wild_data.primary_type = PokemonData.Type.NORMAL
 	wild_data.available_moves = ["Investida", "Ataque Rápido", "", ""]
 	enemy.set("pokemon_data", wild_data)
 	enemy.set("max_hp", wild_data.hp)
