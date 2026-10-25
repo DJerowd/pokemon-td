@@ -109,7 +109,6 @@ static func _resource_to_dictionary(resource: PokemonData) -> Dictionary:
 		"speed": resource.speed, "moves": resource.available_moves.duplicate(),
 		"id": resource.id
 	}
-}
 
 static func get_species(species_name: String) -> Dictionary:
 	var resource := _load_species_resource(species_name)
