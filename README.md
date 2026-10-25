@@ -199,3 +199,17 @@ O recorte usa a spritesheet definida por `SPRITE_SHEET_PATH` em `scenes/entities
 - `SpriteFrameFactory.gd`: recorte/transparência dos frames, caso seja necessário ajustar a remoção de fundo.
 
 Após alterar coordenadas, execute uma onda no Godot e confira visualmente cada espécie antes de adicionar muitos inimigos ao roster.
+
+
+## Catálogo central de espécies
+
+O catálogo compartilhado fica em `scripts/data/StarterDatabase.gd`. Cada espécie tem nome, tipo(s), origem do sprite, atributos base e golpes. Use `StarterDatabase.get_species("Bulbasaur")` para consultar os dados e `StarterDatabase.create_pokemon_data("Bulbasaur", 5)` para criar um recurso `PokemonData` pronto para uma torre, um inicial ou um Pokémon capturado.
+
+- `scenes/ui/StarterSelectScene.gd` usa `create_pokemon_data()` ao confirmar o inicial.
+- `scenes/main/WaveManager.gd` cria inimigos usando o mesmo catálogo. O roster da onda mantém apenas ajustes de encontro, como HP de batalha, velocidade, recompensa e política de captura; a origem de sprite das espécies conhecidas vem do catálogo.
+- `scenes/entities/PokemonTower.gd` consome o mesmo recurso `PokemonData` usado pelo restante do jogo.
+- Para adicionar uma espécie inicial, inclua-a em `generations`. Para espécies disponíveis apenas em ondas, use `additional_species`. Inimigos especiais podem usar um nome personalizado e reutilizar os dados de uma espécie-base.
+
+## Bolsas separadas na batalha
+
+Na parte inferior direita há dois botões: **ITENS** abre Poções/itens de status e **BOLAS** abre a lista separada de Pokébolas. Cada painel fecha ao clicar fora dele ou ao selecionar uma entrada. Se os PNGs da bolsa ainda não estiverem instalados, os botões usam texto para continuarem visíveis e clicáveis.
