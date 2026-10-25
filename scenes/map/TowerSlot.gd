@@ -41,6 +41,7 @@ func relocate_existing_pokemon(pokemon_data: PokemonData) -> void:
 			if old_slot and is_instance_valid(old_slot):
 				old_slot.occupied = false
 				old_slot.current_tower = null
+			towers_node.remove_child(tower) # _exit_tree libera o registro antes do novo deploy.
 			tower.queue_free()
 			break
 
