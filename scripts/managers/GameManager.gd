@@ -1,34 +1,80 @@
 extends Node
 
-# Recursos globais da partida
+## Gerencia o estado compartilhado da partida.
+## A interface e as cenas devem chamar estes métodos em vez de alterar
+## dinheiro, vidas ou inventário diretamente.
+
+signal stats_changed
+signal game_over_reached
+
 var player_money: int = 100
 var player_lives: int = 10
 var current_wave: int = 0
+var pokeballs: int = 5
+var game_over: bool = false
 
-# Inventário do Jogador (Pokémon capturados)
-var captured_pokemons = []
-
-# Time ativo selecionado para a batalha (1 a 6 Pokémon)
-var active_battle_team = []
-
-# Nova lista para controlar quais Pokémon do time já estão posicionados no mapa
-var deployed_pokemons = []
-
-# Armazena o Pokémon selecionado na barra inferior para posicionamento
-var selected_pokemon_to_place = null
+var captured_pokemons: Array[PokemonData] = []
+var active_battle_team: Array[PokemonData] = []
+var deployed_pokemons: Array[PokemonData] = []
+var selected_pokemon_to_place: PokemonData = null
 
 func add_money(amount: int) -> void:
+	# Recompensas negativas não fazem sentido: recuse-as para evitar bugs
+	# em que uma chamada incorreta aumenta o saldo.
+	if amount <= 0 or game_over:
+		return
 	player_money += amount
-	print("Dinheiro atual: ", player_money)
+	stats_changed.emit()
 
 func spend_money(amount: int) -> bool:
-	if player_money >= amount:
-		player_money -= amount
-		return true
-	return false
+	# Um custo deve ser positivo e o saldo precisa ser suficiente.
+	if amount <= 0 or player_money < amount or game_over:
+		return false
+	player_money -= amount
+	stats_changed.emit()
+	return true
 
 func take_damage(amount: int) -> void:
-	player_lives -= amount
-	if player_lives <= 0:
-		print("Game Over!")
-		# Lógica de fim de jogo
+	if amount <= 0 or game_over:
+		return
+	player_lives = maxi(0, player_lives - amount)
+	stats_changed.emit()
+	if player_lives == 0:
+		game_over = true
+		selected_pokemon_to_place = null
+		game_over_reached.emit()
+
+func use_pokeball() -> bool:
+	# Centraliza o consumo para que nenhuma cena possa deixar o contador negativo.
+	if game_over or pokeballs <= 0:
+		return false
+	pokeballs -= 1
+	stats_changed.emit()
+	return true
+
+func capture_pokemon(pokemon: PokemonData) -> bool:
+	if pokemon == null or game_over:
+		return false
+	if captured_pokemons.has(pokemon):
+		return false
+	captured_pokemons.append(pokemon)
+	stats_changed.emit()
+	return true
+
+func is_pokemon_in_active_team(pokemon: PokemonData) -> bool:
+	return pokemon != null and active_battle_team.has(pokemon)
+
+func can_deploy_pokemon(pokemon: PokemonData) -> bool:
+	# A equipe selecionada é a lista permitida durante a batalha.
+	return not game_over and is_pokemon_in_active_team(pokemon)
+
+func deploy_pokemon(pokemon: PokemonData) -> bool:
+	if not can_deploy_pokemon(pokemon):
+		return false
+	if deployed_pokemons.has(pokemon):
+		return false
+	deployed_pokemons.append(pokemon)
+	return true
+
+func undeploy_pokemon(pokemon: PokemonData) -> void:
+	deployed_pokemons.erase(pokemon)
